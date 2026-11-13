@@ -176,7 +176,7 @@ async function createOrder(request, env) {
   const produit = clean(b.produit, 120);
   if (!Object.prototype.hasOwnProperty.call(CATALOG, produit)) throw new HttpError(400, 'Programme inconnu.');
   const prix = CATALOG[produit];
-  const methode = ['paypal', 'revolut'].includes(b.methode) ? b.methode : null;
+  const methode = ['paypal', 'revolut', 'virement'].includes(b.methode) ? b.methode : null;
   const u = await currentUser(request, env);
   let c;
   if (u) {

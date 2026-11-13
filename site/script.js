@@ -589,6 +589,19 @@ document.addEventListener('DOMContentLoaded', function(){
     }).catch(function(){});
   });
 
+  /* v31 : 3e moyen de paiement, virement bancaire : la commande est enregistree, puis WhatsApp
+     s'ouvre avec un message pret (prenom, nom, programme, prix, reference). Victor repond avec son IBAN. */
+  document.getElementById('payVirement')?.addEventListener('click', function(){
+    PROG.methode = 'virement';
+    var p = document.getElementById('payPrenom').value.trim();
+    var n = document.getElementById('payNom').value.trim();
+    valider().then(function(){
+      var msg = 'Bonjour Victor, je souhaite payer par virement bancaire.\n\nPrénom : ' + p + '\nNom : ' + n + '\nProgramme : ' + PROG.nom + '\nPrix : ' + PROG.prix + '\nRéférence : ' + PROG.ref + '\n\nPeux-tu m\'envoyer ton IBAN ?';
+      document.getElementById('payOk').innerHTML = '<p><b>Merci !</b> Commande <b>'+PROG.ref+'</b> enregistrée. Ouverture de WhatsApp…</p><p class="muted">Envoie le message pré-rempli : je te réponds avec mon IBAN. Ton programme est envoyé dès que j\'ai reçu le virement. Il apparaît ensuite dans ta bibliothèque.</p><p><a class="btn" target="_blank" rel="noopener" href="https://wa.me/33767927163?text=' + encodeURIComponent(msg) + '">OUVRIR WHATSAPP</a></p>';
+      setTimeout(function(){ window.location.href = 'https://wa.me/33767927163?text=' + encodeURIComponent(msg); }, 2600);
+    }).catch(function(){});
+  });
+
   btnRev?.addEventListener('click', function(){
     PROG.methode = 'revolut';
     valider().then(function(){

@@ -436,3 +436,12 @@ h1,h2,h3{overflow-wrap:break-word}
 .statsbox h2{font-size:clamp(22px,3vw,28px)}
 .chartwrap{max-width:560px;margin:8px auto 0}
 @media(max-width:800px){.statsbox{padding:16px}.statnums{grid-template-columns:1fr 1fr 1fr;gap:8px}.statnum{padding:10px}.statnum strong{font-size:20px}.statnum span{font-size:11px}}
+
+/* v38 - partenaires cote a cote (Prozis + Celsius) */
+.partners{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.partners .prozis{flex-direction:column;align-items:flex-start;justify-content:space-between;padding:34px;gap:22px}
+.partners .prozis h2{font-size:clamp(30px,4vw,48px)}
+.partners .prozis p{margin:10px 0 0;max-width:420px}
+.prozis.celsius{background:linear-gradient(135deg,#2a1466 0%,#6a35c4 48%,#3860be 100%)}
+.prozis.celsius .btn{color:#3b1d8a}
+@media(max-width:800px){.partners{grid-template-columns:1fr}.partners .prozis{padding:28px}}

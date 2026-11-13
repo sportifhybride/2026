@@ -726,7 +726,6 @@ document.addEventListener('DOMContentLoaded', function(){
            {t:'video', src:'assets/preuves/video.mp4'}   (25 Mo maximum par fichier)
            {t:'youtube', id:'IDENTIFIANT_DE_LA_VIDEO'}   (recommande pour les videos lourdes) */
 window.HC_MEDIA = {
-  victor: [{t:'img', src:'assets/preuves/victor-avant.webp', alt:'Développé couché : avant', label:'Avant'},{t:'img', src:'assets/preuves/victor-apres.webp', alt:'Développé couché : après', label:'Après'}],
   steve: [],
   fabio: [],
   valentine: [],

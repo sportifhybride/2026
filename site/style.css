@@ -372,3 +372,18 @@ fieldset{border:0;padding:0;margin:0}
 .langbtn .langchev{width:14px;height:14px}
 .legal-page h1{font-size:clamp(30px,8.4vw,50px);overflow-wrap:anywhere;hyphens:auto}
 h1,h2,h3{overflow-wrap:break-word}
+
+/* v33 - carte Fabio compacte, meme gabarit que Valentine */
+.avis .res{align-items:stretch}
+.avis .res .proof{display:flex;flex-direction:column;justify-content:center}
+.avis .res .proof.proof-row{display:grid;grid-template-columns:1fr 112px;grid-auto-rows:auto;column-gap:18px;row-gap:6px;align-items:center}
+.avis .res .proof.proof-row>.pr,.avis .res .proof.proof-row>strong{grid-column:1}
+.avis .res .proof.proof-row>.mediaslot{grid-column:2;grid-row:1/span 2;margin:0}
+.avis .res .proof.proof-row .mediaslot figure,.avis .res .proof.proof-row .mediaslot img{margin:0;width:112px;max-width:112px}
+.avis .res .proof.proof-row .mediaslot img{height:150px;object-fit:cover;border-radius:10px;cursor:zoom-in}
+@media(max-width:800px){.avis .res .proof.proof-row{grid-template-columns:1fr 96px}.avis .res .proof.proof-row .mediaslot figure,.avis .res .proof.proof-row .mediaslot img{width:96px;max-width:96px}}
+.avis .res.res-fab{grid-template-columns:minmax(200px,1fr) minmax(0,1.8fr)}
+.avis .res .proof.proof-row strong.chronos{font-size:21px;line-height:1.55;white-space:nowrap}
+.avis .res .proof.proof-row .mediaslot img{object-position:center 22%}
+@media(max-width:800px){.avis .res.res-fab{grid-template-columns:1fr}.avis .res .proof.proof-row strong.chronos{font-size:18px}}
+@media(max-width:800px){.avis .res .proof.proof-row strong.chronos{white-space:normal;font-size:16px}.avis .res .proof.proof-row{grid-template-columns:1fr 84px}.avis .res .proof.proof-row .mediaslot figure,.avis .res .proof.proof-row .mediaslot img{width:84px;max-width:84px}}

@@ -387,3 +387,25 @@ h1,h2,h3{overflow-wrap:break-word}
 .avis .res .proof.proof-row .mediaslot img{object-position:center 22%}
 @media(max-width:800px){.avis .res.res-fab{grid-template-columns:1fr}.avis .res .proof.proof-row strong.chronos{font-size:18px}}
 @media(max-width:800px){.avis .res .proof.proof-row strong.chronos{white-space:normal;font-size:16px}.avis .res .proof.proof-row{grid-template-columns:1fr 84px}.avis .res .proof.proof-row .mediaslot figure,.avis .res .proof.proof-row .mediaslot img{width:84px;max-width:84px}}
+
+/* v34 - carte Fabio : boites a gauche, photo sur le cote */
+.avis .res.res-fab{display:grid;grid-template-columns:minmax(0,1fr) 230px;grid-template-rows:auto auto;gap:16px;align-items:stretch}
+.avis .res.res-fab .pw{grid-column:1;grid-row:1;position:relative;display:block}
+.avis .res.res-fab .pc{grid-column:1;grid-row:2;display:block}
+.avis .res.res-fab .pc strong.chronos{white-space:normal;font-size:21px;line-height:1.6}
+.avis .res.res-fab .fabside{grid-column:2;grid-row:1/span 2;display:flex;margin:0}
+.avis .res.res-fab .fabside figure,.avis .res.res-fab .fabside .zoomable{margin:0;flex:1;display:flex;width:100%}
+.avis .res.res-fab .fabside img{width:100%;height:100%;max-width:none;object-fit:cover;object-position:center 20%;border-radius:12px;border:1px solid var(--line);cursor:zoom-in}
+.wbars{margin:14px 0 4px;display:grid;gap:8px;max-width:420px}
+.wb{display:grid;grid-template-columns:52px 1fr auto;align-items:center;gap:10px;font-size:12.5px;color:var(--muted)}
+.wb em{font-style:normal;text-transform:uppercase;letter-spacing:.08em;font-size:11px}
+.wb i{display:block;height:10px;border-radius:99px;background:#26332f}
+.wb i.ap{background:linear-gradient(90deg,#278cff,#35ff84);box-shadow:0 0 14px #35ff8440}
+.wb b{color:var(--text);font-weight:800;min-width:48px;text-align:right}
+.pw .delta{position:absolute;top:16px;right:16px;padding:5px 11px;border-radius:99px;background:#10241a;border:1px solid #237344;color:var(--green);font-weight:900;font-size:14px}
+@media(max-width:800px){
+ .avis .res.res-fab{grid-template-columns:1fr;grid-template-rows:auto}
+ .avis .res.res-fab .pw,.avis .res.res-fab .pc,.avis .res.res-fab .fabside{grid-column:1;grid-row:auto}
+ .avis .res.res-fab .fabside{height:320px}
+ .avis .res.res-fab .pc strong.chronos{font-size:17px}
+}

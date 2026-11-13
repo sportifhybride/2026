@@ -21,7 +21,7 @@ Pourquoi GitHub : l'envoi par glisser-déposer de Cloudflare Pages ne prend PAS 
 5. **Vérifier** : ouvre `https://sportifhybride.com/api/me` → tu dois voir `{"user":null,"orders":[]}`. Puis crée un compte test sur `/compte`.
 
 ## Au quotidien
-- Une commande arrive → elle apparaît sur `https://sportifhybride.com/admin` (saisis ta clé d'administration). Quand tu as reçu le paiement (PayPal ou Revolut), clique **Payée ✓** : le programme passe en « Payée — disponible » dans l'espace du client.
+- Une commande arrive → elle apparaît sur `https://sportifhybride.com/admin` (saisis ta clé d'administration). Quand tu as reçu le paiement (Revolut), clique **Payée ✓** : le programme passe en « Payée — disponible » dans l'espace du client.
 - Tu envoies le PDF par WhatsApp/e-mail avec la référence (HC-00001…).
 - Mot de passe oublié : le client te contacte, tu me demandes de le réinitialiser (pas d'envoi d'e-mail automatique pour l'instant).
 

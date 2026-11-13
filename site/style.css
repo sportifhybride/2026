@@ -409,3 +409,20 @@ h1,h2,h3{overflow-wrap:break-word}
  .avis .res.res-fab .fabside{height:320px}
  .avis .res.res-fab .pc strong.chronos{font-size:17px}
 }
+
+/* v35 - menu du haut plus vivant */
+.top{border-bottom:0;position:sticky}
+.top:after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,#35ff8466 20%,#278cff88 50%,#35ff8466 80%,transparent);background-size:200% 100%;animation:navsheen 7s linear infinite}
+@keyframes navsheen{0%{background-position:0 0}100%{background-position:200% 0}}
+.links{gap:4px;align-items:center}
+.links a{position:relative;padding:9px 13px;border-radius:99px;font-weight:700;font-size:13.5px;letter-spacing:.015em;color:#d5dcd9;transition:color .2s,background .2s,transform .2s}
+.links a:after{content:"";position:absolute;left:50%;bottom:3px;width:0;height:2px;border-radius:2px;background:linear-gradient(90deg,#278cff,#35ff84);transform:translateX(-50%);transition:width .25s ease}
+.links a:hover{color:#fff;background:#35ff8414;transform:translateY(-1px)}
+.links a:hover:after{width:calc(100% - 26px)}
+.links a[aria-current=page]{color:var(--green);background:#35ff8418}
+.links a[aria-current=page]:after{width:calc(100% - 26px);box-shadow:0 0 10px #35ff84aa}
+.links a:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.brand{transition:transform .25s}.brand:hover{transform:translateY(-1px)}
+.brand img{transition:transform .5s}.brand:hover img{transform:rotate(-8deg) scale(1.06)}
+@media(max-width:800px){.links.open a{padding:13px 14px;font-size:16px;border-radius:12px}.links.open a:after{display:none}}
+@media(prefers-reduced-motion:reduce){.top:after{animation:none}.links a,.brand,.brand img{transition:none}}

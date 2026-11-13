@@ -850,3 +850,14 @@ document.addEventListener('DOMContentLoaded', function(){
   /* si l'animation ne peut pas se lancer, on affiche quand meme les vrais chiffres */
   box.querySelectorAll('[data-count]').forEach(function(el){ el.textContent = fmt(el, parseFloat(el.getAttribute('data-count'))); });
 });
+
+/* v35 - lien de la page courante surligne dans le menu */
+document.addEventListener('DOMContentLoaded', function(){
+  var f = (location.pathname.split('/').pop() || 'index').replace(/\.html$/,'');
+  if(f === 'resultats') f = 'avis';
+  if(f === 'bibliotheque' || f === 'compte') f = 'espace';
+  document.querySelectorAll('.links a').forEach(function(a){
+    var h = (a.getAttribute('href')||'').replace(/\.html$/,'');
+    if(h === f) a.setAttribute('aria-current','page');
+  });
+});

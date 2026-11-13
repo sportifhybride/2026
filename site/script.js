@@ -172,97 +172,6 @@ document.getElementById('giftBtn')?.addEventListener('click',function(){
 
 
 /* ============================================================
-   HYBRIDE COACHING — Traduction FR / EN (v5, refaite proprement)
-   Chaque texte est mémorisé une fois, puis restauré exactement.
-   ============================================================ */
-(function(){
-  var DICT = { "DÉCOUVRIR MA PHILOSOPHIE DU COACHING": "DISCOVER MY COACHING PHILOSOPHY", "MASQUER MA PHILOSOPHIE": "HIDE MY PHILOSOPHY", "ACHETER LE PDF · 15 €": "BUY THE PDF · €15", "FORMATION PDF": "PDF COURSE", "Pas de coaching sur piste ✗": "No track coaching ✗", "MA PHILOSOPHIE D'ENTRAÎNEMENT": "MY TRAINING PHILOSOPHY", "COMMENT JE TRAVAILLE": "HOW I WORK", "Une saison se construit dans la durée. Voici les principes qui guident chaque plan que j'écris.": "A season is built over time. These are the principles behind every plan I write.", "Une saison complète": "A complete season", "Hiver : on construit le volume et la base aérobie, avec des allures faciles. Été : on réduit le volume, on monte en qualité, on travaille des allures plus rapides et les qualités de vitesse et d'explosivité. L'objectif est d'être complet, pas seulement rapide sur une distance.": "Winter: build volume and the aerobic base at easy paces. Summer: cut the volume, raise the quality, work at faster paces and develop speed and explosiveness. The goal is to be complete, not just fast over one distance.", "On travaille d'abord tes points forts": "We build on your strengths first", "Un point fort solidifié tire le reste vers le haut. On consolide ce que tu fais déjà bien avant de corriger les faiblesses.": "A solid strength pulls everything else up. We lock in what you already do well before fixing weaknesses.", "Le volume s'adapte à ton niveau": "Volume adapts to your level", "Le nombre de séances par semaine change selon ton profil, avec un minimum de 3 et un maximum de 6.": "The number of weekly sessions changes with your profile, with a minimum of 3 and a maximum of 6.", "Entraînement croisé": "Cross training", "Vélo et musculation servent à ajouter du volume sans casser le corps : prévention des blessures et charge mieux répartie.": "Cycling and strength work add volume without breaking the body: injury prevention and a better spread load.", "Décharge toutes les 4 semaines": "A deload every 4 weeks", "Une semaine allégée n'est pas perdue : c'est là que les adaptations se consolident.": "An easier week is not lost time: that is when adaptations consolidate.", "Double projet possible": "Two goals in one season", "Plusieurs distances peuvent se préparer sur la même saison, à condition d'organiser les cycles correctement.": "Several distances can be prepared in the same season, as long as the cycles are organised properly.", "UN EXEMPLE RÉEL": "A REAL EXAMPLE", "Voici comment Fabio a été accompagné. C'est un exemple, pas un modèle à copier : chaque plan est construit sur mesure.": "Here is how Fabio was coached. It is an example, not a template: every plan is built to measure.", "Sa semaine type": "His typical week", "Deux séances de course en période générale, trois quand une compétition approche, deux en affûtage. Plus la musculation en prévention des blessures, et du vélo le week-end.": "Two running sessions in the general phase, three as a race approaches, two while tapering. Plus strength work for injury prevention, and cycling at the weekend.", "Son volume": "His volume", "De 15 à 30 km par semaine, pas plus. Une progression très progressive, jamais de saut brutal.": "From 15 to 30 km a week, no more. Very gradual progression, never a brutal jump.", "Ses objectifs": "His goals", "Des courses à peu près tous les deux mois, avec une semaine de décharge toutes les 4 semaines.": "A race roughly every two months, with a deload week every 4 weeks.", "Son affûtage": "His taper", "À l'approche de la course, moins de musculation, plus de qualité et de spécifique, à volume égal.": "As the race gets close, less strength work, more quality and race-specific work, at the same volume.", "Son suivi": "His follow-up", "Le plan était sur un Google Sheets partagé : séances et retours de l'athlète, mis à jour chaque week-end, accessible sur téléphone comme sur ordinateur, et personnalisable à tout moment.": "The plan lived in a shared Google Sheet: sessions and the athlete's feedback, updated every weekend, available on phone and computer, editable at any time.", "Le contact": "Contact", "Un appel tous les deux semaines, en option, pour faire le point et ajuster.": "An optional call every two weeks to review and adjust.", "Programmes": "Programs", "Coaching": "Coaching", "Avis": "Reviews", "Résultats": "Results", "Mon parcours": "About me", "Outils": "Tools", "Mon espace": "My space", "Contact": "Contact", "Mentions légales": "Legal notice", "CGV": "Terms of sale", "Confidentialité": "Privacy", "Cookies": "Cookies", "by Victor Castillo": "by Victor Castillo", "FORCE. ENDURANCE.<br>VITESSE. PUISSANCE.": "STRENGTH. ENDURANCE.<br>SPEED. POWER.", "Une approche fondée sur la pratique, l'apprentissage en STAPS, les connaissances scientifiques et l'expérience du terrain.": "An approach built on practice, STAPS training, scientific knowledge and field experience.", "Ma philosophie :": "My philosophy:", "la discipline, la régularité, la patience, le travail et la foi. Ce sont les vraies clés — bien avant n'importe quel programme.": "discipline, consistency, patience, hard work and faith. These are the real keys — long before any program.", "DÉCOUVRIR LES PROGRAMMES": "SEE THE PROGRAMS", "COACHING PERSONNALISÉ": "PERSONAL COACHING", "Victor Castillo": "Victor Castillo", "Étudiant en L2 STAPS<br>Entraînement sportif — Paris Cité": "L2 STAPS student<br>Sport Training — Paris Cité", "DEPUIS 2026": "SINCE 2026", "personnes coachées": "people coached", "Sportifs accompagnés individuellement depuis le début de l'aventure Hybride Coaching.": "Athletes individually coached since the beginning of Hybride Coaching.", "CHOISIS TON OBJECTIF": "CHOOSE YOUR GOAL", "PROGRAMMES": "PROGRAMS", "FORCE": "STRENGTH", "DÉTENTE": "VERTICAL JUMP", "PERFORMANCE ATHLÉTIQUE": "ATHLETIC PERFORMANCE", "MUSCULATION": "MUSCLE BUILDING", "COURSE À PIED<br>COACHING PERSONNALISÉ": "RUNNING<br>PERSONAL COACHING", "2 mois · 30 €": "2 months · €30", "Du 5 km au marathon": "From 5K to marathon", "Sur route uniquement · pas de coaching sur piste": "Road only · no track coaching", "DEMANDER MON PROGRAMME": "REQUEST MY PROGRAM", "DÉCOUVRIR →": "DISCOVER →", "Les contenus détaillés et les prix seront finalisés avant l'ouverture des ventes. Aucun paiement n'est encore activé.": "Detailed content and prices will be finalised before sales open. No payment is enabled yet.", "AVIS CLIENTS": "CLIENT REVIEWS", "CE QU'ILS EN DISENT": "WHAT THEY SAY", "sur 12 avis vérifiés": "from 12 verified reviews", "Note moyenne calculée à partir des retours reçus depuis 2026.": "Average rating based on feedback received since 2026.", "Témoignages publiés avec l'accord des personnes concernées.": "Reviews published with the consent of the people involved.", "« Je cours depuis des années, mais j'ai vraiment progressé quand on a structuré mes séances. Le suivi est sérieux et adapté. »": "“I've been running for years, but I truly progressed once my sessions were structured. The coaching is serious and tailored.”", "« Le suivi course à pied m'a fait progresser sur route sans me griller. Le plan s'adaptait vraiment à mon emploi du temps. »": "“The running coaching helped me progress on the road without burning out. The plan genuinely fitted my schedule.”", "« Un entraînement intense et exigeant, mais qui vaut clairement le coup. On progresse et on comprend pourquoi. »": "“Intense and demanding training, but clearly worth it. You progress and you understand why.”", "Fabio, 53 ans": "Fabio, 53", "Valentine, 24 ans": "Valentine, 24", "Steve, 18 ans": "Steve, 18", "Course à pied · 10 km": "Running · 10K", "Course à pied · 5 km sur route": "Running · 5K on road", "Performance · basket": "Performance · basketball", "PREUVES À L'APPUI": "PROOF IN HAND", "LA PROGRESSION": "PROGRESS", "Des progressions réelles, avec le contexte. Les résultats varient selon le profil, l'assiduité et la récupération.": "Real progress, with context. Results vary with the individual, consistency and recovery.", "Développé couché": "Bench press", "Évolution basket": "Basketball progression", "Course à pied · progression sur route": "Running · road progression", "Victor, 19 ans · progression 2023-2026": "Victor, 19 · progress 2023-2026", "Steve, 18 ans · 2022 → 2023": "Steve, 18 · 2022 → 2023", "Valentine, 24 ans · en 3 mois": "Valentine, 24 · in 3 months", "Données publiées avec l'accord des personnes concernées. Les progressions dépendent du point de départ, de la régularité et du contexte individuel.": "Data published with the consent of the people involved. Progress depends on the starting point, consistency and individual context.", "L'ATHLÈTE DERRIÈRE LA MÉTHODE": "THE ATHLETE BEHIND THE METHOD", "VICTOR CASTILLO": "VICTOR CASTILLO", "J'ai 19 ans. Étudiant en L2 STAPS, mention Entraînement sportif, à Paris Cité, je construis une approche qui associe les connaissances scientifiques, l'apprentissage universitaire et l'expérience pratique du terrain.": "I'm 19. A second-year STAPS student, specialising in sport training, at Paris Cité, I'm building an approach that combines scientific knowledge, university learning and hands-on field experience.", "J'ai commencé la musculation seul, sans club, parce qu'un athlète doit toujours travailler son corps : c'est la machine qui fait performer, dans n'importe quel sport.": "I started strength training alone, with no club, because an athlete must always work on their body: it's the machine that performs, in any sport.", "Ancien basketteur compétitif jusqu'au niveau national dans les catégories jeunes U15 et U18, avec des sélections départementales, je suis aujourd'hui athlète de demi-fond. J'ai pratiqué plus de 9 sports à différents niveaux : basket, athlétisme, natation, rugby, football, judo, tennis, vélo, musculation et course à pied. Trois d'entre eux au niveau régional, et des médailles départementales en judo (champion et 3e de Seine-et-Marne).": "A former competitive basketball player up to national level in the U15 and U18 youth categories, with regional selections, I'm now a middle-distance athlete. I've practised more than 9 sports at various levels: basketball, athletics, swimming, rugby, football, judo, tennis, cycling, strength training and running. Three of them at regional level, plus departmental medals in judo (champion and 3rd in Seine-et-Marne).", "Je participe aussi à l'encadrement de jeunes athlètes sur les disciplines de course, de saut et de lancer.<br><br>J'entraîne depuis 2022, d'abord mon entourage et mes amis, puis ma famille, et aujourd'hui des sportifs rencontrés sur les réseaux. Le sport est au centre de ma vie depuis l'âge de 5-6 ans : c'est devenu une évidence, et c'est ce que je veux transmettre.": "I also help coach young athletes in running, jumping and throwing.<br><br>I've been coaching since 2022 — first friends and people around me, then family, and now athletes I've met through social media. Sport has been at the centre of my life since I was 5 or 6: it became obvious, and that's what I want to pass on.", "En parallèle, je crée du contenu sur les réseaux sociaux depuis 2023 : plus de 3 millions de vues cumulées, plus de 2 000 abonnés, et un partenariat avec une marque de nutrition sportive.": "Alongside this, I've been creating content on social media since 2023: over 3 million cumulative views, more than 2,000 followers, and a partnership with a sports nutrition brand.", "La foi en Dieu accompagne mon cheminement et ma vision de la progression.": "Faith in God accompanies my journey and my vision of progress.", "PARTENAIRE": "PARTNER", "PROZIS": "PROZIS", "Équipement et compléments via mon lien partenaire.": "Equipment and supplements through my partner link.", "COMMANDER AVEC MON LIEN": "ORDER WITH MY LINK", "Lien affilié : je peux recevoir une commission sur les achats, sans coût supplémentaire pour toi.": "Affiliate link: I may receive a commission on purchases, at no extra cost to you.", "OUTILS GRATUITS": "FREE TOOLS", "CALCULATEURS": "CALCULATORS", "Estimations indicatives : elles ne remplacent ni une évaluation individuelle ni un test physiologique.": "Indicative estimates: they replace neither an individual assessment nor a physiological test.", "Calculateur de 1RM": "1RM calculator", "Charge soulevée (kg)": "Weight lifted (kg)", "Nombre de répétitions": "Number of reps", "CALCULER": "CALCULATE", "1RM estimé : ": "Estimated 1RM: ", "Calculateur d'allure": "Pace calculator", "Distance (km)": "Distance (km)", "Temps (hh:mm:ss ou mm:ss)": "Time (hh:mm:ss or mm:ss)", "Allure moyenne : ": "Average pace: ", "PARLONS DE TON OBJECTIF": "LET'S TALK ABOUT YOUR GOAL", "CONTACT": "CONTACT", "Le formulaire sera relié à un service d'envoi avant la mise en ligne. Tu peux déjà me contacter par email ou Instagram.": "The form will be connected to a sending service before launch. You can already reach me by email or Instagram.", "Nom": "Name", "Email": "Email", "Objectif principal": "Main goal", "Niveau actuel": "Current level", "Parle-moi de ton objectif, tes contraintes et tes disponibilités": "Tell me about your goal, your constraints and your availability", "ENVOYER LA DEMANDE": "SEND MY REQUEST", "Respect de ta vie privée": "We respect your privacy", "Ce site utilise uniquement les cookies nécessaires pour le moment. Les statistiques seront ajoutées après configuration et consentement.": "This site currently uses only essential cookies. Analytics will be added after configuration and consent.", "Accepter": "Accept", "Refuser": "Refuse", "ESPACE MEMBRE": "MEMBER AREA", "Aperçu": "Preview", "espace membre en préparation — les comptes ne sont pas encore ouverts": "member area in preparation — accounts are not open yet", "Les inscriptions seront ouvertes prochainement. En attendant, écris-moi directement à castillovictor77600@gmail.com.": "Sign-ups will open soon. In the meantime, write to me directly at castillovictor77600@gmail.com.", "CRÉER MON COMPTE": "CREATE MY ACCOUNT", "J'AI DÉJÀ UN COMPTE": "I ALREADY HAVE AN ACCOUNT", "CONNEXION": "LOG IN", "Prénom": "First name", "Nom de famille": "Last name", "Mot de passe": "Password", "Confirmer le mot de passe": "Confirm password", "Téléphone (facultatif)": "Phone (optional)", "SE CONNECTER": "LOG IN", "Mot de passe oublié ?": "Forgot your password?", "MA BIBLIOTHÈQUE": "MY LIBRARY", "Mes programmes": "My programs", "OUVRIR": "OPEN", "Mes programmes sur devis": "My custom programs", "SUIVRE MA COMMANDE": "TRACK MY ORDER", "J'AI UN CODE": "I HAVE A CODE", "Entre ton code": "Enter your code", "VALIDER MON CODE": "VALIDATE MY CODE", "Chaque code est à usage unique. Une fois utilisé, il ne peut plus servir.": "Each code can be used once. Once used, it no longer works.", "MON ESPACE": "MY SPACE", "TABLEAU DE BORD": "DASHBOARD", "Profil": "Profile", "Commandes": "Orders", "Informations": "Information", "Programmes achetés": "Programs purchased", "Accompagnement en cours": "Current coaching", "Langue": "Language", "VOIR TOUS LES AVIS": "SEE ALL REVIEWS", "VOIR LES DÉTAILS DE MA PHILOSOPHIE": "SEE MY COACHING PHILOSOPHY", "MASQUER LES DÉTAILS": "HIDE THE DETAILS" };
-
-  var SKIP = {SCRIPT:1,STYLE:1,NOSCRIPT:1,CODE:1,PRE:1};
-
-  function nodes(){
-    var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
-      acceptNode: function(n){
-        if(!n.nodeValue || !n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
-        if(SKIP[n.parentNode && n.parentNode.nodeName]) return NodeFilter.FILTER_REJECT;
-        if(n.parentNode && n.parentNode.closest && n.parentNode.closest('.lang')) return NodeFilter.FILTER_REJECT;
-        return NodeFilter.FILTER_ACCEPT;
-      }
-    });
-    var out=[], n;
-    while((n=walker.nextNode())) out.push(n);
-    return out;
-  }
-
-  var memo = null;
-
-  function collect(){
-    memo = nodes().map(function(n){
-      return {node:n, fr:n.nodeValue};
-    });
-  }
-
-  function apply(lang){
-    if(!memo) collect();
-    memo.forEach(function(item){
-      var n = item.node;
-      if(!n || !n.parentNode) return;
-      if(lang === 'en'){
-        var raw = item.fr;
-        var lead = raw.match(/^\s*/)[0], tail = raw.match(/\s*$/)[0];
-        var core = raw.trim();
-        var tr = DICT[core];
-        n.nodeValue = tr ? (lead + tr + tail) : raw;
-      } else {
-        n.nodeValue = item.fr;
-      }
-    });
-    // placeholders
-    document.querySelectorAll('[data-ph-fr]').forEach(function(el){
-      el.placeholder = (lang==='en') ? el.getAttribute('placeholder') : el.getAttribute('data-ph-fr');
-    });
-    // attributs alt d'images
-    if(lang==='en'){
-      document.querySelectorAll('img[alt]').forEach(function(img){
-        if(!img.dataset.altFr){ img.dataset.altFr = img.alt; }
-        var a = img.dataset.altFr, lead=a.match(/^\s*/)[0], tail=a.match(/\s*$/)[0], core=a.trim();
-        img.alt = DICT[core] ? (lead+DICT[core]+tail) : a;
-      });
-    } else {
-      document.querySelectorAll('img[data-alt-fr]').forEach(function(img){ img.alt = img.dataset.altFr; });
-    }
-    document.documentElement.lang = (lang==='en') ? 'en' : 'fr';
-    try{ localStorage.setItem('hc-lang', lang); }catch(e){}
-    // boutons : on surligne la langue active, sans jamais traduire les libellés
-    document.querySelectorAll('.lang button').forEach(function(b){
-      var on = (b.dataset.lang === lang);
-      b.style.color = on ? '#35ff84' : 'inherit';
-      b.style.fontWeight = on ? '900' : '400';
-      b.style.textDecoration = 'none';
-    });
-  }
-
-  // construction des boutons FR | EN (libellés figés)
-  document.querySelectorAll('.lang').forEach(function(box){
-    box.innerHTML = '<button type="button" data-lang="fr">FR</button><span>|</span><button type="button" data-lang="en">EN</button>';
-    box.querySelectorAll('button').forEach(function(b){
-      b.style.cssText = 'background:none;border:0;color:inherit;font:inherit;cursor:pointer;padding:0 3px';
-      b.addEventListener('click', function(e){
-        e.preventDefault();
-        e.stopPropagation();
-        apply(b.dataset.lang);
-      });
-    });
-  });
-
-  collect();
-  var saved = 'fr';
-  try{ saved = localStorage.getItem('hc-lang') || 'fr'; }catch(e){}
-  apply(saved);
-})();
-
-
-/* ============================================================
    v5 — CHARGE DE TRAVAIL (1 à 20 répétitions)
    Table de pourcentages moyens du 1RM selon le nombre de reps,
    d'apres les cadrages de la litterature en musculation.
@@ -744,7 +653,7 @@ document.addEventListener('DOMContentLoaded', function(){
     if(out) out.onclick = function(){ HC.api('/api/logout').then(function(){ location.href='compte.html'; }); };
     var del = document.getElementById('delBtn');
     if(del) del.onclick = function(){
-      if(!confirm('Supprimer définitivement ton compte ? Tes informations personnelles seront effacées.')) return;
+      if(!confirm(window.hcT?hcT('Supprimer définitivement ton compte ? Tes informations personnelles seront effacées.'):'Supprimer définitivement ton compte ? Tes informations personnelles seront effacées.')) return;
       HC.api('/api/account/delete').then(function(){ location.href='index.html'; }).catch(function(e){ alert(e.message); });
     };
   });
@@ -860,4 +769,72 @@ document.addEventListener('DOMContentLoaded', function(){
       document.body.appendChild(o);
     });
   });
+});
+
+
+/* v29 - Mon parcours : compteurs animes + courbe d'abonnes.
+   Pour mettre a jour : modifie HC_STATS (points de la courbe) et les chiffres data-count dans parcours.html. */
+window.HC_STATS = [
+  {l:'2024', v:600},
+  {l:'Avr. 2025', v:1000},
+  {l:'Sept. 2025', v:1200},
+  {l:'Janv. 2026', v:1500},
+  {l:'Juin 2026', v:2000},
+  {l:'Nov. 2026', v:2200}
+];
+document.addEventListener('DOMContentLoaded', function(){
+  var box = document.getElementById('stats');
+  if(!box) return;
+  var nf = new Intl.NumberFormat('fr-FR');
+  function fmt(el, v){
+    var f = el.getAttribute('data-fmt');
+    if(f === 'views') return v >= 1e6 ? (Math.round(v/1e4)/100).toString().replace('.',',') + ' M' : nf.format(Math.round(v));
+    if(f === 'x') return '×' + (Math.round(v*10)/10).toString().replace('.',',');
+    return nf.format(Math.round(v));
+  }
+  function count(el){
+    var end = parseFloat(el.getAttribute('data-count')), t0 = null;
+    function step(t){
+      if(t0 === null) t0 = t;
+      var k = Math.min(1,(t-t0)/1600), e = 1 - Math.pow(1-k,3);
+      el.textContent = fmt(el, end*e);
+      if(k < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  /* courbe */
+  var svg = document.getElementById('followChart'), D = window.HC_STATS, W = 640, H = 300, L = 46, R = 44, T = 24, B = 44;
+  var max = Math.ceil(Math.max.apply(null, D.map(function(d){return d.v;}))/500)*500;
+  function X(i){ return L + i*(W-L-R)/(D.length-1); }
+  function Y(v){ return T + (1 - v/max)*(H-T-B); }
+  var line = D.map(function(d,i){ return (i?'L':'M') + X(i).toFixed(1) + ' ' + Y(d.v).toFixed(1); }).join(' ');
+  var area = line + ' L' + X(D.length-1) + ' ' + (H-B) + ' L' + X(0) + ' ' + (H-B) + ' Z';
+  var grid = '';
+  for(var g = 0; g <= max; g += 500){
+    grid += '<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(g)+'" y2="'+Y(g)+'" stroke="#22302d" stroke-width="1"/><text x="'+(L-8)+'" y="'+(Y(g)+4)+'" text-anchor="end" fill="#7e8b87" font-size="11">'+nf.format(g)+'</text>';
+  }
+  var dots = D.map(function(d,i){
+    var last = i === D.length-1;
+    return '<g class="cdot" style="animation-delay:'+(0.9+i*0.18)+'s"><circle cx="'+X(i)+'" cy="'+Y(d.v)+'" r="'+(last?7:5)+'" fill="'+(last?'#35ff84':'#070909')+'" stroke="#35ff84" stroke-width="2.5"/>'
+      + '<text x="'+X(i)+'" y="'+(Y(d.v)-14)+'" text-anchor="middle" fill="'+(last?'#35ff84':'#f5f7f6')+'" font-size="'+(last?15:13)+'" font-weight="800">'+nf.format(d.v)+'</text></g>'
+      + '<text x="'+X(i)+'" y="'+(H-16)+'" text-anchor="middle" fill="#a6b1ad" font-size="11.5">'+d.l+'</text>';
+  }).join('');
+  svg.innerHTML = '<defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#35ff84" stop-opacity=".38"/><stop offset="1" stop-color="#35ff84" stop-opacity="0"/></linearGradient>'
+    + '<linearGradient id="gl" x1="0" x2="1"><stop offset="0" stop-color="#278cff"/><stop offset="1" stop-color="#35ff84"/></linearGradient></defs>'
+    + grid + '<path d="'+area+'" fill="url(#ga)" class="carea"/><path id="cline" d="'+line+'" fill="none" stroke="url(#gl)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>' + dots;
+  var path = document.getElementById('cline'), len = path.getTotalLength();
+  path.style.strokeDasharray = len; path.style.strokeDashoffset = len;
+  var started = false;
+  function go(){
+    if(started) return; started = true;
+    box.classList.add('play');
+    path.style.transition = 'stroke-dashoffset 1.6s ease'; path.style.strokeDashoffset = 0;
+    box.querySelectorAll('[data-count]').forEach(count);
+  }
+  if('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ go(); io.disconnect(); } }); }, {threshold:.25});
+    io.observe(box);
+  } else { go(); }
+  /* si l'animation ne peut pas se lancer, on affiche quand meme les vrais chiffres */
+  box.querySelectorAll('[data-count]').forEach(function(el){ el.textContent = fmt(el, parseFloat(el.getAttribute('data-count'))); });
 });

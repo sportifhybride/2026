@@ -917,3 +917,13 @@ document.addEventListener('DOMContentLoaded', function(){
   window.addEventListener('load', fit);
   go(0);
 });
+
+/* v42 : programmes — deux entrées */
+(function(){
+  var open=document.getElementById('openProgs'),back=document.getElementById('backEntries'),ent=document.getElementById('entries'),list=document.getElementById('progList');
+  if(!open||!list)return;
+  function show(on){list.hidden=!on;ent.hidden=on;if(on){try{history.replaceState(null,'','#programmes')}catch(e){}}else{try{history.replaceState(null,'',location.pathname)}catch(e){}}window.scrollTo({top:0,behavior:'smooth'})}
+  open.addEventListener('click',function(e){e.preventDefault();show(true)});
+  back.addEventListener('click',function(e){e.preventDefault();show(false)});
+  if(location.hash==='#programmes')show(true);
+})();

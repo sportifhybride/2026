@@ -509,3 +509,18 @@ h1,h2,h3{overflow-wrap:break-word}
 .duo .statnum span{font-size:11px}
 .duo .chartwrap{max-width:none;margin-top:10px}
 @media(max-width:900px){.duo{grid-template-columns:1fr}.duo .sportsgrid{grid-template-columns:repeat(3,1fr)}.duo .statnums{grid-template-columns:1fr 1fr 1fr}}
+/* v41 */
+.encbox{margin:30px 0;padding:22px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(160deg,#0e1514,#0a0f0e)}
+.encbox h2{margin:8px 0 14px;font-size:clamp(22px,3vw,30px);line-height:1.05}
+.encgrid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.encbox .enc p{margin:0 0 12px;font-size:15px}
+.encbox .pfig{margin:0;max-width:none}
+.encbox .pfig img{aspect-ratio:4/3;object-fit:cover}
+@media(max-width:800px){.encgrid{grid-template-columns:1fr}}
+.links a{padding:9px 11px}
+.duo .sportsgrid img{aspect-ratio:3/4;object-position:center 25%}
+.links a{white-space:nowrap;font-size:13px;padding:9px 9px}
+.links{gap:2px}
+.brand span{white-space:nowrap}
+@media(max-width:1320px){.links{display:none}.menu{display:block}.links.open{display:flex;position:absolute;top:74px;left:0;right:0;background:#090c0b;padding:20px;flex-direction:column;align-items:flex-start}}
+@media(max-width:1520px){html[lang=es] .links{display:none}html[lang=es] .menu{display:block}html[lang=es] .links.open{display:flex;position:absolute;top:74px;left:0;right:0;background:#090c0b;padding:20px;flex-direction:column;align-items:flex-start}}

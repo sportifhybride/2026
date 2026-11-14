@@ -493,3 +493,19 @@ h1,h2,h3{overflow-wrap:break-word}
 .avis .res.res-fab .fabside figure,.avis .res.res-fab .fabside .zoomable{display:block;flex:none}
 .avis .res.res-fab .fabside img{width:100%;height:auto;aspect-ratio:657/1314;object-fit:cover;object-position:center top}
 @media(max-width:800px){.avis .res.res-side{grid-template-columns:1fr}.avis .res.res-side .sideph{max-width:260px}.avis .res.res-fab{grid-template-columns:1fr}.avis .res.res-fab .fabside{height:auto;max-width:240px}}
+/* v40 : sports + réseaux côte à côte (50/50) */
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:40px 0 10px;align-items:stretch}
+.duo .sportsbox,.duo .statsbox{margin:0;max-width:none;padding:20px;min-width:0}
+.duo h2{font-size:clamp(20px,2.4vw,26px)}
+.duo .sportsbox>.muted{display:none}
+.duo .sportsgrid{gap:10px;margin-top:12px}
+.duo .sportsgrid img{aspect-ratio:1/1}
+.duo .sportsgrid figcaption{margin-top:6px}
+.duo .sportsgrid figcaption b{font-size:14px}
+.duo .sportsgrid figcaption span{font-size:11px;line-height:1.3}
+.duo .statnums{gap:8px;margin-top:12px}
+.duo .statnum{padding:10px}
+.duo .statnum strong{font-size:22px}
+.duo .statnum span{font-size:11px}
+.duo .chartwrap{max-width:none;margin-top:10px}
+@media(max-width:900px){.duo{grid-template-columns:1fr}.duo .sportsgrid{grid-template-columns:repeat(3,1fr)}.duo .statnums{grid-template-columns:1fr 1fr 1fr}}

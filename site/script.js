@@ -930,7 +930,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
 
 /* v45 - WhatsApp flottant, boutons WhatsApp, chaine newsletter */
-window.HC_NEWSLETTER_URL = '';   /* colle ici le lien de la chaine WhatsApp, ex. https://whatsapp.com/channel/XXXX */
+window.HC_NEWSLETTER_URL = 'https://whatsapp.com/channel/0029VbDwRxTCBtxDxqQPFq1v';   /* colle ici le lien de la chaine WhatsApp, ex. https://whatsapp.com/channel/XXXX */
 (function(){
   var MSG = "Bonjour Victor, je viens de ton site et j'aimerais en savoir plus sur le coaching.";
   function waHref(){ var m = (window.hcT ? window.hcT(MSG) : MSG); return 'https://wa.me/33767927163?text=' + encodeURIComponent(m); }

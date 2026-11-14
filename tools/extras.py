@@ -227,3 +227,9 @@ EXACT += [
 ("Bonjour Victor, je viens de ton site et j'aimerais en savoir plus sur le coaching.","Hi Victor, I'm coming from your website and I'd like to know more about the coaching.","Hola Victor, vengo de tu web y me gustaría saber más sobre el coaching."),
 ("Pour moi, la pratique physique est essentielle pour la santé et le bien-être. Elle permet de voir ailleurs que dans le travail et les études, de prendre soin de soi et de se dépasser. Elle apporte aussi plein de valeurs utiles au quotidien, dans tous les domaines de la vie.","For me, physical activity is essential for health and well-being. It lets you look beyond work and studies, take care of yourself and push your limits. It also brings plenty of values that are useful every day, in every area of life.","Para mí, la práctica física es esencial para la salud y el bienestar. Permite mirar más allá del trabajo y los estudios, cuidarse y superarse. También aporta muchos valores útiles en el día a día, en todos los ámbitos de la vida."),
 ]
+
+EXACT += [
+("Newsletter de la semaine","Weekly newsletter","Newsletter semanal"),
+("REJOINDRE LA NEWSLETTER","JOIN THE NEWSLETTER","UNIRME A LA NEWSLETTER"),
+("Newsletter de la semaine · WhatsApp","Weekly newsletter · WhatsApp","Newsletter semanal · WhatsApp"),
+]

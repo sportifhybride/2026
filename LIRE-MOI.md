@@ -33,3 +33,11 @@ Pourquoi GitHub : l'envoi par glisser-déposer de Cloudflare Pages ne prend PAS 
 ## Limites actuelles
 - Pas d'e-mail automatique (confirmation, mot de passe oublié) ni de livraison automatique du PDF : prévu pour une v23 (service d'e-mail gratuit + stockage R2).
 - Vérifie ta situation légale avant de vendre régulièrement (je ne suis pas juriste).
+
+## v45 : langues, référencement, newsletter
+
+- **Pages EN/ES réelles** : `site/en/*` et `site/es/*` sont générées à partir des pages françaises (Google peut les indexer, avec les balises hreflang). **Après toute modification d'une page française**, relancer depuis le dossier `tools` :
+  `python3 build_i18n.py && python3 build_langs.py` (nécessite Python + Playwright/Chromium). Cela régénère aussi le `<head>` SEO (titres, descriptions, données structurées) et `sitemap.xml`.
+- Titres et descriptions SEO : `tools/seo.py`. Traductions : `tools/en.json`, `tools/es.json`, `tools/extras.py`.
+- **Chaîne WhatsApp (newsletter)** : coller le lien de la chaîne dans `site/script.js`, ligne `window.HC_NEWSLETTER_URL = '';`. Tant qu'elle est vide, les boutons « Rejoindre la chaîne » ne font rien.
+- **À faire côté Google** : ajouter le site dans Google Search Console (propriété « sportifhybride.com »), y envoyer `https://sportifhybride.com/sitemap.xml`, mettre le lien du site dans la bio Instagram / TikTok / YouTube / LinkedIn / Strava, et ajouter le lien d'avis Google quand la fiche sera validée.

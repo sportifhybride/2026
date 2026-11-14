@@ -857,7 +857,7 @@ document.addEventListener('DOMContentLoaded', function(){
   if(f === 'resultats') f = 'avis';
   if(f === 'bibliotheque' || f === 'compte') f = 'espace';
   document.querySelectorAll('.links a').forEach(function(a){
-    var h = (a.getAttribute('href')||'').replace(/\.html$/,'');
+    var h = ((a.getAttribute('href')||'').replace(/\.html$/,'').split('/').pop()) || 'index';
     if(h === f) a.setAttribute('aria-current','page');
   });
 });
@@ -926,4 +926,26 @@ document.addEventListener('DOMContentLoaded', function(){
   open.addEventListener('click',function(e){e.preventDefault();show(true)});
   back.addEventListener('click',function(e){e.preventDefault();show(false)});
   if(location.hash==='#programmes')show(true);
+})();
+
+
+/* v45 - WhatsApp flottant, boutons WhatsApp, chaine newsletter */
+window.HC_NEWSLETTER_URL = '';   /* colle ici le lien de la chaine WhatsApp, ex. https://whatsapp.com/channel/XXXX */
+(function(){
+  var MSG = "Bonjour Victor, je viens de ton site et j'aimerais en savoir plus sur le coaching.";
+  function waHref(){ var m = (window.hcT ? window.hcT(MSG) : MSG); return 'https://wa.me/33767927163?text=' + encodeURIComponent(m); }
+  document.addEventListener('DOMContentLoaded', function(){
+    if(document.querySelector('#adminRoot') || /admin/.test(location.pathname)) return;
+    var a = document.createElement('a');
+    a.className = 'wafab'; a.setAttribute('data-wa',''); a.target = '_blank'; a.rel = 'noopener'; a.href = waHref();
+    a.setAttribute('aria-label', 'Écris-moi sur WhatsApp');
+    a.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="currentColor" d="M4 3h16a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H9l-5 4v-4H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg><span>Écris-moi</span>';
+    document.body.appendChild(a);
+  });
+  document.addEventListener('click', function(e){
+    var w = e.target.closest && e.target.closest('[data-wa]');
+    if(w){ w.href = waHref(); }
+    var n = e.target.closest && e.target.closest('[data-nl]');
+    if(n){ e.preventDefault(); if(window.HC_NEWSLETTER_URL) window.open(window.HC_NEWSLETTER_URL, '_blank', 'noopener'); }
+  }, true);
 })();

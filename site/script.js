@@ -728,7 +728,7 @@ document.addEventListener('DOMContentLoaded', function(){
 window.HC_MEDIA = {
   steve: [],
   fabio: [],
-  valentine: [],
+  valentine: [{t:'img', src:'assets/preuves/valentine-coach.webp', alt:'Valentine à l\'arrivée, avec son coach'}],
   parcours: []
 };
 document.addEventListener('DOMContentLoaded', function(){
@@ -860,4 +860,60 @@ document.addEventListener('DOMContentLoaded', function(){
     var h = (a.getAttribute('href')||'').replace(/\.html$/,'');
     if(h === f) a.setAttribute('aria-current','page');
   });
+});
+
+/* v39 - avis : carrousel (fleches, points, glisser) */
+document.addEventListener('DOMContentLoaded', function(){
+  var list = document.querySelector('.avislist');
+  if(!list) return;
+  var figs = Array.prototype.slice.call(list.children).filter(function(e){ return e.tagName === 'FIGURE'; });
+  if(figs.length < 2) return;
+  var root = document.createElement('div');
+  root.className = 'avsl'; root.setAttribute('role','region'); root.setAttribute('aria-roledescription','carousel'); root.setAttribute('aria-label','Avis'); root.tabIndex = 0;
+  var view = document.createElement('div'); view.className = 'avsl-view';
+  var track = document.createElement('div'); track.className = 'avsl-track'; view.appendChild(track);
+  var slides = figs.map(function(f){
+    var s = document.createElement('div'); s.className = 'avsl-slide'; s.appendChild(f); track.appendChild(s); return s;
+  });
+  var ARR = function(d){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="'+d+'"/></svg>'; };
+  var prev = document.createElement('button'); prev.type='button'; prev.className='avsl-btn avsl-prev'; prev.setAttribute('aria-label','Avis précédent'); prev.innerHTML = ARR('M15 5l-7 7 7 7');
+  var next = document.createElement('button'); next.type='button'; next.className='avsl-btn avsl-next'; next.setAttribute('aria-label','Avis suivant'); next.innerHTML = ARR('M9 5l7 7-7 7');
+  var nav = document.createElement('div'); nav.className = 'avsl-nav';
+  var count = document.createElement('span'); count.className = 'avsl-count';
+  var dots = document.createElement('div'); dots.className = 'avsl-dots';
+  var dotEls = slides.map(function(_, i){
+    var d = document.createElement('button'); d.type='button'; d.className='avsl-dot'; d.setAttribute('aria-label','Avis ' + (i+1)); d.addEventListener('click', function(){ go(i); }); dots.appendChild(d); return d;
+  });
+  nav.appendChild(count); nav.appendChild(dots);
+  root.appendChild(view); root.appendChild(prev); root.appendChild(next); root.appendChild(nav);
+  list.parentNode.insertBefore(root, list); list.style.display = 'none';
+
+  var idx = 0;
+  function fit(){ var h = slides[idx].offsetHeight; if(h) view.style.height = h + 'px'; }
+  function go(i){
+    idx = (i + slides.length) % slides.length;
+    track.style.transform = 'translateX(' + (-idx*100) + '%)';
+    slides.forEach(function(s, k){ var on = k === idx; s.classList.toggle('on', on); if(on) s.removeAttribute('inert'); else s.setAttribute('inert',''); s.setAttribute('aria-hidden', on ? 'false' : 'true'); });
+    dotEls.forEach(function(d, k){ d.classList.toggle('on', k === idx); });
+    count.textContent = (idx+1) + ' / ' + slides.length;
+    fit();
+  }
+  prev.addEventListener('click', function(){ go(idx-1); });
+  next.addEventListener('click', function(){ go(idx+1); });
+  root.addEventListener('keydown', function(e){
+    if(e.key === 'ArrowLeft'){ e.preventDefault(); go(idx-1); }
+    else if(e.key === 'ArrowRight'){ e.preventDefault(); go(idx+1); }
+  });
+  var x0 = null, y0 = null;
+  view.addEventListener('pointerdown', function(e){ if(e.pointerType === 'mouse') return; x0 = e.clientX; y0 = e.clientY; });
+  view.addEventListener('pointerup', function(e){
+    if(x0 === null) return;
+    var dx = e.clientX - x0, dy = e.clientY - y0; x0 = null;
+    if(Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) go(idx + (dx < 0 ? 1 : -1));
+  });
+  view.addEventListener('pointercancel', function(){ x0 = null; });
+  if(window.ResizeObserver){ var ro = new ResizeObserver(fit); slides.forEach(function(s){ ro.observe(s); }); }
+  window.addEventListener('resize', fit);
+  window.addEventListener('load', fit);
+  go(0);
 });

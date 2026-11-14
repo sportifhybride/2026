@@ -445,3 +445,51 @@ h1,h2,h3{overflow-wrap:break-word}
 .prozis.celsius{background:linear-gradient(135deg,#2a1466 0%,#6a35c4 48%,#3860be 100%)}
 .prozis.celsius .btn{color:#3b1d8a}
 @media(max-width:800px){.partners{grid-template-columns:1fr}.partners .prozis{padding:28px}}
+
+/* v39 - 6 sports, graphique reduit, Strava */
+.social.strava{background:#fc4c02;color:#fff}
+.sportsgrid figcaption span{font-size:12.5px}
+.statsbox{max-width:520px;padding:18px}
+.chartwrap{max-width:430px}
+.statnum strong{font-size:clamp(20px,3vw,26px)}
+.statnums{gap:8px}
+.statnum{padding:10px 12px}
+.statnum span{font-size:11.5px}
+
+/* v39 - avis : carrousel de bulles, etoiles, photos laterales */
+.stars{display:flex;gap:3px;margin:0 0 14px;color:#ffb400}
+.stars svg{fill:currentColor;filter:drop-shadow(0 0 7px #ffb40055)}
+.avsl{position:relative;margin:34px auto 6px;max-width:880px}
+.avsl-view{overflow:hidden;transition:height .45s ease;border-radius:4px}
+.avsl-track{display:flex;align-items:flex-start;transition:transform .6s cubic-bezier(.65,0,.25,1)}
+.avsl-slide{flex:0 0 100%;min-width:0;padding:6px 10px 44px;opacity:.25;transform:scale(.95);transition:opacity .5s,transform .5s}
+.avsl-slide.on{opacity:1;transform:none}
+.avsl .avis{position:relative;margin:0;padding:32px 36px 30px;border:2px solid transparent;border-radius:30px 30px 30px 10px;background:linear-gradient(#0f1716,#0b100f) padding-box,linear-gradient(135deg,#278cff,#35ff84 55%,#ffd166) border-box;box-shadow:0 22px 55px #000a,0 0 46px #35ff8412;grid-column:auto}
+.avsl .avis:before{content:"";position:absolute;left:44px;bottom:-24px;width:32px;height:26px;background:#2fd6a0;clip-path:polygon(0 0,100% 0,0 100%)}
+.avsl .avis:after{content:"\201C";position:absolute;right:26px;top:6px;font:900 96px/1 Georgia,serif;color:#35ff84;opacity:.12;pointer-events:none}
+.avsl .avis blockquote{font-size:16.5px;max-width:none}
+.avsl .avis figcaption{margin-top:4px}
+.avsl .avis .stars{position:relative;z-index:1}
+.avsl-btn{position:absolute;top:calc(50% - 44px);z-index:5;width:50px;height:50px;border-radius:50%;border:1px solid #2c3b37;background:#0d1312f2;color:#fff;display:grid;place-items:center;cursor:pointer;box-shadow:0 10px 28px #000a;transition:background .2s,border-color .2s,transform .2s,color .2s}
+.avsl-btn:hover{background:#35ff84;border-color:#35ff84;color:#041108;transform:scale(1.08)}
+.avsl-btn:focus-visible{outline:2px solid var(--green);outline-offset:3px}
+.avsl-btn svg{width:22px;height:22px}
+.avsl-prev{left:-66px}.avsl-next{right:-66px}
+.avsl-nav{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:-18px}
+.avsl-count{font-weight:800;font-size:13px;letter-spacing:.08em;color:var(--muted);min-width:54px;text-align:center}
+.avsl-dots{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:300px}
+.avsl-dot{width:8px;height:8px;border-radius:99px;border:0;padding:0;background:#2a3834;cursor:pointer;transition:width .3s,background .3s}
+.avsl-dot.on{width:24px;background:linear-gradient(90deg,#278cff,#35ff84)}
+@media(max-width:1060px){.avsl{max-width:720px}.avsl-prev{left:-6px}.avsl-next{right:-6px}}
+@media(max-width:800px){.avsl .avis{padding:26px 20px 24px;border-radius:24px 24px 24px 8px}.avsl-slide{padding:6px 2px 40px}.avsl-btn{width:42px;height:42px;top:auto;bottom:-6px}.avsl-prev{left:2px}.avsl-next{right:2px}.avsl-nav{margin-top:-24px;gap:10px;padding:0 48px}.avsl-dots{max-width:200px}}
+@media(prefers-reduced-motion:reduce){.avsl-track,.avsl-view,.avsl-slide{transition:none}}
+/* cartes resultats : Valentine (photo a cote) et Fabio (photo non recadree) */
+.avis .res.res-side{display:grid;grid-template-columns:minmax(0,1fr) 230px;gap:16px;align-items:center}
+.avis .res.res-side .sideph{margin:0}
+.avis .res.res-side .sideph figure{margin:0}
+.avis .res.res-side .sideph img{width:100%;height:auto;aspect-ratio:3/4;object-fit:cover;border-radius:12px;border:1px solid var(--line);cursor:zoom-in}
+.avis .res.res-fab{grid-template-columns:minmax(0,1fr) 240px}
+.avis .res.res-fab .fabside{align-self:start}
+.avis .res.res-fab .fabside figure,.avis .res.res-fab .fabside .zoomable{display:block;flex:none}
+.avis .res.res-fab .fabside img{width:100%;height:auto;aspect-ratio:657/1314;object-fit:cover;object-position:center top}
+@media(max-width:800px){.avis .res.res-side{grid-template-columns:1fr}.avis .res.res-side .sideph{max-width:260px}.avis .res.res-fab{grid-template-columns:1fr}.avis .res.res-fab .fabside{height:auto;max-width:240px}}

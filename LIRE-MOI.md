@@ -36,7 +36,7 @@ Pourquoi GitHub : l'envoi par glisser-déposer de Cloudflare Pages ne prend PAS 
 
 ## v45 : langues, référencement, newsletter
 
-- **Pages EN/ES réelles** : `site/en/*` et `site/es/*` sont générées à partir des pages françaises (Google peut les indexer, avec les balises hreflang). **Après toute modification d'une page française**, relancer depuis le dossier `tools` :
+- **Pages EN/ES réelles** : `site/en/*` et `site/es/*` sont générées à partir des pages françaises (Google peut les indexer, avec les balises hreflang). **Après toute modification d'une page française**, relancer depuis le dossier `tools` (fourni à part dans `Outils-generation-langues.zip`, à dézipper à côté de `site`) :
   `python3 build_i18n.py && python3 build_langs.py` (nécessite Python + Playwright/Chromium). Cela régénère aussi le `<head>` SEO (titres, descriptions, données structurées) et `sitemap.xml`.
 - Titres et descriptions SEO : `tools/seo.py`. Traductions : `tools/en.json`, `tools/es.json`, `tools/extras.py`.
 - **Chaîne WhatsApp (newsletter)** : le lien de la chaîne est dans `site/script.js`, ligne `window.HC_NEWSLETTER_URL`. Elle est déjà renseignée (chaîne « Hybride Coaching · Newsletter de la semaine »).

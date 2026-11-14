@@ -103,7 +103,7 @@ window.HC_I18N={"en":{"Avis et résultats":"Reviews & results","Mon parcours":"A
     document.querySelectorAll('.lang').forEach(function(box){ refreshUI(box); });
     window.dispatchEvent(new CustomEvent('hc-lang', {detail:l}));
   }
-  var STATIC = ['index','programmes','coaching','force','detente','performance-athletique','musculation','nutrition','creation-site','avis','parcours','outils','faq','contact','mentions-legales','cgv','confidentialite','cookies'];
+  var STATIC = ['index','programmes','coaching','force','detente','performance-athletique','musculation','nutrition','creation-site','avis','parcours','outils','faq','contact'];
   function slugOf(){
     var p = location.pathname.replace(/^\/(en|es)(?=\/|$)/,'').replace(/\.html$/,'').replace(/^\/+|\/+$/g,'');
     if(p === 'resultats') p = 'avis';

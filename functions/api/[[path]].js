@@ -234,11 +234,31 @@ async function adminMark(request, env) {
   return json({ ok: true });
 }
 
+/* ---------- base : creation automatique des tables manquantes (sans effet si elles existent deja) ---------- */
+const SCHEMA = [
+  "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL UNIQUE, prenom TEXT NOT NULL, nom TEXT NOT NULL, tel TEXT, pass_hash TEXT NOT NULL, salt TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT (datetime('now')))",
+  "CREATE TABLE IF NOT EXISTS sessions (token_hash TEXT PRIMARY KEY, user_id INTEGER NOT NULL, expires_at TEXT NOT NULL, FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE)",
+  "CREATE TABLE IF NOT EXISTS orders (id INTEGER PRIMARY KEY AUTOINCREMENT, ref TEXT NOT NULL UNIQUE, user_id INTEGER, produit TEXT NOT NULL, prix_eur INTEGER NOT NULL, methode TEXT, status TEXT NOT NULL DEFAULT 'en_attente', client_prenom TEXT, client_nom TEXT, client_tel TEXT, client_email TEXT, created_at TEXT NOT NULL DEFAULT (datetime('now')), paid_at TEXT, FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE SET NULL)",
+  "CREATE INDEX IF NOT EXISTS idx_orders_user ON orders(user_id)",
+  "CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)",
+  "CREATE TABLE IF NOT EXISTS login_fails (email TEXT NOT NULL, ts INTEGER NOT NULL)",
+  "CREATE INDEX IF NOT EXISTS idx_fails ON login_fails(email, ts)"
+];
+let schemaReady = false;
+async function ensureSchema(env) {
+  if (schemaReady) return;
+  try { await env.DB.batch(SCHEMA.map((q) => env.DB.prepare(q))); schemaReady = true; }
+  catch (e) { console.error('ensureSchema', e && e.message); }
+}
+
+const path_for_log = (r) => { try { return new URL(r.url).pathname; } catch (e) { return ''; } };
+
 /* ---------- point d'entree ---------- */
 export async function onRequest(context) {
   const { request, env, params } = context;
   try {
     if (!env.DB) throw new HttpError(500, 'Base de donnees non liee au site.');
+    await ensureSchema(env);
     const path = '/' + (Array.isArray(params.path) ? params.path.join('/') : params.path || '');
     const method = request.method;
 
@@ -259,6 +279,9 @@ export async function onRequest(context) {
     throw new HttpError(404, 'Introuvable.');
   } catch (e) {
     if (e instanceof HttpError) return json({ error: e.message }, e.status);
-    return json({ error: 'Erreur du serveur. Reessaie dans un instant.' }, 500);
+    console.error('API error', path_for_log(request), e && e.message);
+    const m = String((e && e.message) || '');
+    const hint = /no such (table|column)|has no column/i.test(m) ? ' (base de donnees incomplete : ' + m.slice(0, 80) + ')' : '';
+    return json({ error: 'Erreur du serveur. Reessaie dans un instant.' + hint }, 500);
   }
 }

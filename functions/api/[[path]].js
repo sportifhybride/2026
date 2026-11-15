@@ -281,7 +281,8 @@ export async function onRequest(context) {
     if (e instanceof HttpError) return json({ error: e.message }, e.status);
     console.error('API error', path_for_log(request), e && e.message);
     const m = String((e && e.message) || '');
-    const hint = /no such (table|column)|has no column/i.test(m) ? ' (base de donnees incomplete : ' + m.slice(0, 80) + ')' : '';
+    /* DIAGNOSTIC TEMPORAIRE : affiche la cause reelle (a retirer une fois le probleme regle) */
+    const hint = m ? ' [diagnostic : ' + m.slice(0, 160) + ']' : '';
     return json({ error: 'Erreur du serveur. Reessaie dans un instant.' + hint }, 500);
   }
 }

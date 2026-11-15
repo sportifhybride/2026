@@ -41,3 +41,9 @@ Pourquoi GitHub : l'envoi par glisser-déposer de Cloudflare Pages ne prend PAS 
 - Titres et descriptions SEO : `tools/seo.py`. Traductions : `tools/en.json`, `tools/es.json`, `tools/extras.py`.
 - **Chaîne WhatsApp (newsletter)** : le lien de la chaîne est dans `site/script.js`, ligne `window.HC_NEWSLETTER_URL`. Elle est déjà renseignée (chaîne « Hybride Coaching · Newsletter de la semaine »).
 - **À faire côté Google** : ajouter le site dans Google Search Console (propriété « sportifhybride.com »), y envoyer `https://sportifhybride.com/sitemap.xml`, mettre le lien du site dans la bio Instagram / TikTok / YouTube / LinkedIn / Strava, et ajouter le lien d'avis Google quand la fiche sera validée.
+
+## v47
+- Sous-programmes : bouton « En savoir plus », deux formules (sans suivi = prix affiché, avec suivi = +5 €), Home Body ajouté.
+- Serveur : `functions/api/[[path]].js` contient les nouveaux prix (clés « … + suivi », Home Body, Nutrition seul 10 €).
+- Création de site : rubrique à part (menu après Outils, bandeaux, pied de page).
+- Pages légales réécrites ; `_headers` renforcé (CSP, HSTS…).

@@ -571,48 +571,66 @@ document.addEventListener('DOMContentLoaded', function(){
       if(pw.length < 8){ erreur('Choisis un mot de passe d’au moins 8 caractères.'); return Promise.reject(); }
       etape = HC.api('/api/register', {prenom:p, nom:n, tel:t, email:m, password:pw}).then(function(d){ USER = d.user; });
     }
+    /* v59 : le paiement ne depend plus du serveur. On essaie d'enregistrer la commande (6 s max),
+       mais si le serveur ne repond pas, le client est quand meme envoye vers le paiement et
+       ses informations partent aussi par WhatsApp. */
     return etape
-      .then(function(){ return HC.api('/api/orders', {produit:PROG.nom, methode:PROG.methode, client:{prenom:p, nom:n, tel:t, email:m}}); })
-      .then(function(d){
-        PROG.ref = d.ref;
-        if(parseInt(String(PROG.prix).replace(/[^0-9]/g,''),10) !== d.prix_eur){ throw new Error('Le prix a changé : recharge la page.'); }
+      .then(function(){
+        var appel = HC.api('/api/orders', {produit:PROG.nom, methode:PROG.methode, client:{prenom:p, nom:n, tel:t, email:m}});
+        var limite = new Promise(function(_, rej){ setTimeout(function(){ rej(new Error('delai')); }, 6000); });
+        return Promise.race([appel, limite]);
+      })
+      .then(function(d){ PROG.ref = d.ref; PROG.enregistree = true; })
+      .catch(function(){ PROG.ref = 'à confirmer'; PROG.enregistree = false; })
+      .then(function(){
+        PROG.p = p; PROG.n = n; PROG.t = t; PROG.m = m;
         document.getElementById('payForm').hidden = true;
         document.getElementById('payOk').hidden = false;
-      })
-      .catch(function(e){ erreur(e && e.message ? e.message : 'Une erreur est survenue.'); throw e; });
+      });
   }
 
   var recu = ' Après le paiement, envoie ton reçu à castillovictor77600@gmail.com ou sur WhatsApp en rappelant ta référence pour recevoir ton programme.';
 
+  function infoWA(){
+    var msg = 'Bonjour Victor, voici ma commande.\n\nPrénom : ' + PROG.p + '\nNom : ' + PROG.n + '\nTéléphone : ' + PROG.t + '\nEmail : ' + PROG.m +
+      '\nProgramme : ' + PROG.nom + '\nPrix : ' + PROG.prix + '\nMoyen de paiement : ' + PROG.methode + '\nRéférence : ' + PROG.ref;
+    return 'https://wa.me/33767927163?text=' + encodeURIComponent(msg);
+  }
+  /* affiche la confirmation, un bouton de secours cliquable, puis redirige */
+  function finir(action, url, label, delai){
+    var intro = PROG.enregistree
+      ? '<p><b>Merci !</b> Commande <b>' + PROG.ref + '</b> enregistrée. ' + action + '</p>'
+      : '<p><b>Merci !</b> ' + action + '</p>';
+    document.getElementById('payOk').innerHTML = intro + '<p class="muted">' + recu + '</p>' +
+      '<p><a class="btn" href="' + url + '">' + label + '</a></p>' +
+      '<p><a class="btn alt" target="_blank" rel="noopener" href="' + infoWA() + '">M’ENVOYER MES INFOS SUR WHATSAPP</a></p>';
+    setTimeout(function(){ window.location.href = url; }, delai);
+  }
+
   document.getElementById('payGo')?.addEventListener('click', function(){
     PROG.methode = 'paypal';
     valider().then(function(){
-      if(!PAYPAL_ME) return;
       var montant = String(PROG.prix).replace(/[^0-9,\.]/g,'').replace(',','.');
-      document.getElementById('payOk').innerHTML = '<p><b>Merci !</b> Commande <b>'+PROG.ref+'</b> enregistrée. Redirection vers PayPal…</p><p class="muted">'+recu+'</p>';
-      setTimeout(function(){ window.location.href = 'https://www.paypal.me/' + PAYPAL_ME + '/' + montant + 'EUR'; }, 2600);
+      finir('Redirection vers PayPal…', 'https://www.paypal.me/' + PAYPAL_ME + '/' + montant + 'EUR', 'CONTINUER VERS PAYPAL', 1800);
     }).catch(function(){});
   });
 
-  /* v31 : 3e moyen de paiement, virement bancaire : la commande est enregistree, puis WhatsApp
-     s'ouvre avec un message pret (prenom, nom, programme, prix, reference). Victor repond avec son IBAN. */
+  /* virement : WhatsApp s'ouvre avec un message pret (prenom, nom, programme, prix, reference). */
   document.getElementById('payVirement')?.addEventListener('click', function(){
     PROG.methode = 'virement';
-    var p = document.getElementById('payPrenom').value.trim();
-    var n = document.getElementById('payNom').value.trim();
     valider().then(function(){
-      var msg = 'Bonjour Victor, je souhaite payer par virement bancaire.\n\nPrénom : ' + p + '\nNom : ' + n + '\nProgramme : ' + PROG.nom + '\nPrix : ' + PROG.prix + '\nRéférence : ' + PROG.ref + '\n\nPeux-tu m\'envoyer ton IBAN ?';
-      document.getElementById('payOk').innerHTML = '<p><b>Merci !</b> Commande <b>'+PROG.ref+'</b> enregistrée. Ouverture de WhatsApp…</p><p class="muted">Envoie le message pré-rempli : je te réponds avec mon IBAN. Ton programme est envoyé dès que j\'ai reçu le virement.</p><p><a class="btn" target="_blank" rel="noopener" href="https://wa.me/33767927163?text=' + encodeURIComponent(msg) + '">OUVRIR WHATSAPP</a></p>';
-      setTimeout(function(){ window.location.href = 'https://wa.me/33767927163?text=' + encodeURIComponent(msg); }, 2600);
+      var msg = 'Bonjour Victor, je souhaite payer par virement bancaire.\n\nPrénom : ' + PROG.p + '\nNom : ' + PROG.n + '\nTéléphone : ' + PROG.t + '\nEmail : ' + PROG.m + '\nProgramme : ' + PROG.nom + '\nPrix : ' + PROG.prix + '\nRéférence : ' + PROG.ref + '\n\nPeux-tu m\'envoyer ton IBAN ?';
+      var url = 'https://wa.me/33767927163?text=' + encodeURIComponent(msg);
+      document.getElementById('payOk').innerHTML = (PROG.enregistree ? '<p><b>Merci !</b> Commande <b>' + PROG.ref + '</b> enregistrée. Ouverture de WhatsApp…</p>' : '<p><b>Merci !</b> Ouverture de WhatsApp…</p>') +
+        '<p class="muted">Envoie le message pré-rempli : je te réponds avec mon IBAN. Ton programme est envoyé dès que j\'ai reçu le virement.</p><p><a class="btn" href="' + url + '">OUVRIR WHATSAPP</a></p>';
+      setTimeout(function(){ window.location.href = url; }, 1800);
     }).catch(function(){});
   });
 
   btnRev?.addEventListener('click', function(){
     PROG.methode = 'revolut';
     valider().then(function(){
-      if(!REVOLUT_ME) return;
-      document.getElementById('payOk').innerHTML = '<p><b>Merci !</b> Commande <b>'+PROG.ref+'</b> enregistrée. Ouverture de Revolut…</p><p class="muted">Indique le montant de ' + PROG.prix + ' dans Revolut.' + recu + '</p>';
-      setTimeout(function(){ window.location.href = 'https://revolut.me/' + REVOLUT_ME; }, 3400);
+      finir('Ouverture de Revolut…', 'https://revolut.me/' + REVOLUT_ME, 'CONTINUER VERS REVOLUT', 2400);
     }).catch(function(){});
   });
 });

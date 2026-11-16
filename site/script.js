@@ -577,7 +577,7 @@ document.addEventListener('DOMContentLoaded', function(){
       .catch(function(e){ erreur(e && e.message ? e.message : 'Une erreur est survenue.'); throw e; });
   }
 
-  var recu = ' Après le paiement, envoie ton reçu à castillovictor77600@gmail.com ou sur WhatsApp en rappelant ta référence pour recevoir ton programme. Il apparaît ensuite dans ta bibliothèque.';
+  var recu = ' Après le paiement, envoie ton reçu à castillovictor77600@gmail.com ou sur WhatsApp en rappelant ta référence pour recevoir ton programme.';
 
   document.getElementById('payGo')?.addEventListener('click', function(){
     PROG.methode = 'paypal';
@@ -597,7 +597,7 @@ document.addEventListener('DOMContentLoaded', function(){
     var n = document.getElementById('payNom').value.trim();
     valider().then(function(){
       var msg = 'Bonjour Victor, je souhaite payer par virement bancaire.\n\nPrénom : ' + p + '\nNom : ' + n + '\nProgramme : ' + PROG.nom + '\nPrix : ' + PROG.prix + '\nRéférence : ' + PROG.ref + '\n\nPeux-tu m\'envoyer ton IBAN ?';
-      document.getElementById('payOk').innerHTML = '<p><b>Merci !</b> Commande <b>'+PROG.ref+'</b> enregistrée. Ouverture de WhatsApp…</p><p class="muted">Envoie le message pré-rempli : je te réponds avec mon IBAN. Ton programme est envoyé dès que j\'ai reçu le virement. Il apparaît ensuite dans ta bibliothèque.</p><p><a class="btn" target="_blank" rel="noopener" href="https://wa.me/33767927163?text=' + encodeURIComponent(msg) + '">OUVRIR WHATSAPP</a></p>';
+      document.getElementById('payOk').innerHTML = '<p><b>Merci !</b> Commande <b>'+PROG.ref+'</b> enregistrée. Ouverture de WhatsApp…</p><p class="muted">Envoie le message pré-rempli : je te réponds avec mon IBAN. Ton programme est envoyé dès que j\'ai reçu le virement.</p><p><a class="btn" target="_blank" rel="noopener" href="https://wa.me/33767927163?text=' + encodeURIComponent(msg) + '">OUVRIR WHATSAPP</a></p>';
       setTimeout(function(){ window.location.href = 'https://wa.me/33767927163?text=' + encodeURIComponent(msg); }, 2600);
     }).catch(function(){});
   });

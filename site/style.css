@@ -596,3 +596,5 @@ body:has(.cookie.show) .wafab{bottom:170px}
 .payinfo{margin:6px 0 10px;font-size:13px;letter-spacing:.1em;color:var(--green)}
 
 .philclose{margin:22px 0 6px;padding:24px;border:1px solid #237344;border-radius:14px;background:#0c1a13}.philclose h3{margin:0 0 8px;font-size:clamp(22px,2.6vw,30px)}.philclose p{margin:0 0 10px;color:#d3dcd8}.philclose .muted{font-size:14px;margin:0}
+
+.paymsg{margin:10px 0;color:#ff9a9a;font-weight:700;font-size:14px;line-height:1.4}.paymsg:empty{display:none}.payconsent.err{border:1px solid #ff6b6b;border-radius:8px;padding:8px;background:#2a1010}

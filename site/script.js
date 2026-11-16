@@ -521,8 +521,8 @@ document.addEventListener('DOMContentLoaded', function(){
   var USER = null;      /* utilisateur connecté (ou null) */
   var pwdBox = null;    /* champ mot de passe injecté pour "Créer mon compte" */
   var msgBox = document.createElement('p');
-  msgBox.className = 'mini'; msgBox.id = 'payMsg'; msgBox.style.color = '#ff9a9a';
-  document.getElementById('payForm')?.appendChild(msgBox);
+  msgBox.className = 'paymsg'; msgBox.id = 'payMsg'; msgBox.setAttribute('role','alert');
+  (function(){ var go = document.getElementById('payGo'); if(go && go.parentNode) go.parentNode.insertBefore(msgBox, go); })();
 
   function modeCompte(){ var t=document.querySelector('.paytab.on'); return !!t && t.dataset.mode === 'compte' && !USER; }
   function majMode(){
@@ -547,7 +547,12 @@ document.addEventListener('DOMContentLoaded', function(){
     var note = document.getElementById('payNoteCompte'); if(note) note.hidden = true;
   });
 
-  function erreur(t){ msgBox.textContent = t; }
+  function erreur(t){
+    msgBox.textContent = t;
+    var c = document.querySelector('.payconsent');
+    if(c) c.classList.toggle('err', /case|casilla|checkbox/i.test(t) || /Coche la case/.test(t));
+    if(t){ try{ msgBox.scrollIntoView({block:'center', behavior:'smooth'}); }catch(e){} }
+  }
 
   /* vérifie le formulaire, crée (si besoin) le compte puis la commande sur le serveur.
      Renvoie une promesse : le paiement ne s'ouvre qu'une fois la commande enregistrée. */

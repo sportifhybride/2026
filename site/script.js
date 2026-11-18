@@ -972,3 +972,39 @@ window.HC_NEWSLETTER_URL = 'https://whatsapp.com/channel/0029VbDwRxTCBtxDxqQPFq1
     if(n){ e.preventDefault(); if(window.HC_NEWSLETTER_URL) window.open(window.HC_NEWSLETTER_URL, '_blank', 'noopener'); }
   }, true);
 })();
+
+/* HC_QUIZ : "Quel programme pour moi ?" (page d'accueil) */
+(function(){
+  var box = document.getElementById('quiz'); if(!box) return;
+  var q = box.querySelector('.quizbox'), st = {}, hist = [];
+  var back = box.querySelector('.qback');
+  function aff(sel){
+    box.querySelectorAll('.qstep,.qres').forEach(function(e){ e.hidden = !e.matches(sel); });
+    var intro = box.querySelector('.qintro'); if(intro) intro.hidden = !/data-step/.test(sel);
+    back.hidden = !hist.length || /qres|data-res/.test(sel);
+  }
+  function cle(){
+    var o = st.obj;
+    if(o === 'force') return 'sbd';
+    if(o === 'detente') return 'detente-' + (st.lieu === 'salle' ? 'salle' : 'ext');
+    if(o === 'perf') return 'perf-' + (st.lieu === 'salle' ? 'salle' : 'ext');
+    if(o === 'muscu') return st.lieu === 'maison' ? 'homebody' : ({a:'full', b:'double', c:'gymbro'}[st.seances] || 'full');
+    return o;
+  }
+  function suite(){
+    var o = st.obj;
+    if(!o) return aff('[data-step="1"]');
+    if(['detente','perf','muscu'].indexOf(o) > -1 && !st.lieu) return aff('[data-step="2"]');
+    if(o === 'muscu' && st.lieu === 'salle' && !st.seances) return aff('[data-step="3"]');
+    if(['nutrition','course'].indexOf(o) === -1 && !st.suivi) return aff('[data-step="4"]');
+    q.dataset.suivi = st.suivi || '';
+    aff('[data-res="' + cle() + '"]');
+  }
+  box.addEventListener('click', function(e){
+    var b = e.target.closest('button'); if(!b) return;
+    if(b.dataset.k){ st[b.dataset.k] = b.dataset.v; hist.push(b.dataset.k); suite(); }
+    else if(b.classList.contains('qreset')){ st = {}; hist = []; suite(); }
+    else if(b.classList.contains('qback')){ var k = hist.pop(); if(k) delete st[k]; suite(); }
+  });
+  suite();
+})();

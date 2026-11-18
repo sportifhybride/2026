@@ -598,3 +598,33 @@ body:has(.cookie.show) .wafab{bottom:170px}
 .philclose{margin:22px 0 6px;padding:24px;border:1px solid #237344;border-radius:14px;background:#0c1a13}.philclose h3{margin:0 0 8px;font-size:clamp(22px,2.6vw,30px)}.philclose p{margin:0 0 10px;color:#d3dcd8}.philclose .muted{font-size:14px;margin:0}
 
 .paymsg{margin:10px 0;color:#ff9a9a;font-weight:700;font-size:14px;line-height:1.4}.paymsg:empty{display:none}.payconsent.err{border:1px solid #ff6b6b;border-radius:8px;padding:8px;background:#2a1010}
+
+/* v61 : accueil enrichi, quiz, bandeau cookies discret */
+.steps3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:22px}
+.step{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px}
+.step h3{margin:8px 0 6px;font-size:24px}.step p{margin:0;color:#c4cdca}
+.hpgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:22px}
+.hpcard{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;transition:transform .2s,border-color .2s}
+.hpcard:hover{transform:translateY(-3px);border-color:var(--green)}
+.hpcard img{height:150px;object-fit:cover}
+.hpcard div{padding:16px 18px 18px}.hpcard h3{margin:0 0 6px;font-size:20px;line-height:1.1}.hpcard p{margin:0 0 10px;color:#b9c4c0;font-size:14.5px}
+.hpprice{display:inline-block;padding:6px 10px;background:#10241a;border:1px solid #237344;color:var(--green);border-radius:99px;font-weight:800;font-size:13px}
+.quizbox{background:linear-gradient(120deg,#0d1b16,#0a0f14);border:1px solid #237344;border-radius:18px;padding:30px}
+.quizbox h2{font-size:clamp(28px,4vw,44px);margin:6px 0 8px}
+.qq{font-size:20px;font-weight:800;margin:16px 0 12px}
+.qopts{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.qopts button{padding:14px 16px;text-align:left;border-radius:10px;border:1px solid #2c3a36;background:#0b1110;color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.qopts button:hover{border-color:var(--green);background:#10241a}
+.qres h3{font-size:clamp(26px,3.6vw,38px);margin:6px 0 8px}.qres p{color:#d3dcd8}
+.qprice span{display:none;font-weight:900;color:var(--green);font-size:20px}
+.qprice span:only-child,.quizbox[data-suivi=sans] .qprice span[data-s=sans],.quizbox[data-suivi=avec] .qprice span[data-s=avec]{display:inline}
+.qback{margin-top:16px;background:none;border:0;color:#a6b1ad;cursor:pointer;font-size:14px;padding:6px 0}
+.hpavis{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:22px 0}
+.hpq{margin:0;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:10px}
+.hpq .stars{display:flex;gap:3px;color:#ffc531}.hpq .stars svg{fill:#ffc531}
+.hpq blockquote{margin:0;font-style:italic;color:#d3dcd8;font-size:15px;line-height:1.5}
+.hpq figcaption{margin-top:auto;display:flex;flex-direction:column;font-size:13px;color:var(--muted)}.hpq figcaption b{color:#fff;font-size:14px}
+@media(max-width:900px){.steps3,.hpgrid,.hpavis{grid-template-columns:1fr}.qopts{grid-template-columns:1fr}.hpcard img{height:130px}}
+.cookie{left:12px;right:auto;bottom:12px;max-width:390px;padding:10px 12px;border-radius:10px;font-size:12.5px;line-height:1.35;box-shadow:0 8px 24px #000}
+.cookie b{font-size:13px}.cookie-actions{margin-top:8px}.cookie button{padding:6px 10px;font-size:12px}
+@media(max-width:600px){.cookie{left:8px;right:8px;max-width:none;bottom:8px}}

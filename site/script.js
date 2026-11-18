@@ -1034,3 +1034,18 @@ window.HC_NEWSLETTER_URL = 'https://whatsapp.com/channel/0029VbDwRxTCBtxDxqQPFq1
   var pay = document.querySelector('[data-pay]');
   if(pay) pay.addEventListener('click', function(e){ if(!valide()){ e.stopImmediatePropagation(); e.preventDefault(); } }, true);
 })();
+
+/* v63 mouvement debut : supprimer ce bloc pour enlever les animations */
+(function(){try{
+if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+if(!('IntersectionObserver' in window))return;
+var els=[].slice.call(document.querySelectorAll('main .section,main .hpcard,main .card,main .philcard,main .offre,main .hubcard,main .formules,main .steps3>*,main .hpq,main .ctaband'));
+var h=innerHeight;
+els=els.filter(function(e){return e.getBoundingClientRect().top>h*0.9&&!e.closest('#paywall')});
+els.forEach(function(e){e.classList.add('rv')});
+var io=new IntersectionObserver(function(es){es.forEach(function(x){if(x.isIntersecting){x.target.classList.add('rv-in');io.unobserve(x.target)}})},{threshold:0.08,rootMargin:'0px 0px -4% 0px'});
+els.forEach(function(e){io.observe(e)});
+setTimeout(function(){els.forEach(function(e){e.classList.add('rv-in')})},6000);
+addEventListener('beforeprint',function(){els.forEach(function(e){e.classList.add('rv-in')})});
+}catch(e){}})();
+/* v63 mouvement fin */

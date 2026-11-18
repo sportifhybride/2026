@@ -640,3 +640,61 @@ body:has(.cookie.show) .wafab{bottom:170px}
 @media(max-width:720px){.cmform{grid-template-columns:1fr}}
 .hpwide{grid-column:1/-1;flex-direction:row}.hpwide img{width:34%;height:auto;min-height:130px}.hpwide div{flex:1;align-self:center}
 @media(max-width:900px){.hpwide{flex-direction:column}.hpwide img{width:100%;height:130px}}
+
+/* v63 debut : hub coaching, couleurs par famille, textes lisibles */
+.hubintro{font-size:16px;max-width:640px;margin:10px 0 24px}
+.hub{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.hubcard{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;transition:transform .25s,border-color .25s,box-shadow .25s}
+.hubcard img{width:100%;height:230px;object-fit:cover}
+.hubcard div{padding:22px 24px 26px;display:flex;flex-direction:column;flex:1}
+.hubcard h2{margin:0 0 8px;font-size:clamp(26px,3vw,36px);line-height:1.05}
+.hubcard p{margin:0 0 16px;color:#c3ccc9;font-size:16px;line-height:1.5}
+.hubprice{font-weight:900;font-size:20px;color:var(--green);margin-top:auto}
+.hubgo{display:inline-block;margin-top:10px;font-weight:900;font-size:14px;letter-spacing:.06em}
+.hub-run:hover{border-color:var(--green);box-shadow:0 8px 30px #35ff8422}
+.hub-prep{border-color:#2a4a6e}.hub-prep .hubprice,.hub-prep .hubgo{color:#5fb0ff}.hub-prep:hover{border-color:#5fb0ff;box-shadow:0 8px 30px #278cff22}
+.hubh2{margin:6px 0 0}
+#course{scroll-margin-top:90px}
+@media(max-width:800px){.hub{grid-template-columns:1fr}.hubcard img{height:180px}}
+/* familles : une couleur par famille de programme */
+body.fam-force main{--green:#ff5a66}
+body.fam-detente main{--green:#42b8ff}
+body.fam-muscu main{--green:#c98aff}
+body.fam-nutrition main{--green:#ffb43a}
+body.fam-force main .pill:not(.pill-blue):not(.pill-track):not(.pill-grey):not(.pill-soon){background:#2a1013;border-color:#8a2c35}
+body.fam-detente main .pill:not(.pill-blue):not(.pill-track):not(.pill-grey):not(.pill-soon){background:#0c1c2a;border-color:#245f8a}
+body.fam-muscu main .pill:not(.pill-blue):not(.pill-track):not(.pill-grey):not(.pill-soon){background:#1d1228;border-color:#6b3f93}
+body.fam-nutrition main .pill:not(.pill-blue):not(.pill-track):not(.pill-grey):not(.pill-soon){background:#261b08;border-color:#8a6416}
+body.fam-force main .card.prog:hover{border-color:#ff5a66}body.fam-detente main .card.prog:hover{border-color:#42b8ff}body.fam-muscu main .card.prog:hover{border-color:#c98aff}body.fam-nutrition main .card.prog:hover{border-color:#ffb43a}
+.hpcard[href="force.html"] h3{color:#ff5a66}.hpcard[href="detente.html"] h3{color:#42b8ff}.hpcard[href="musculation.html"] h3{color:#c98aff}.hpcard[href="nutrition.html"] h3{color:#ffb43a}.hpcard[href="performance-athletique.html"] h3{color:#35ff84}.hpcard[href="coaching.html"] h3{color:#5fb0ff}
+.hpcard[href="force.html"]:hover{border-color:#ff5a66}.hpcard[href="detente.html"]:hover{border-color:#42b8ff}.hpcard[href="musculation.html"]:hover{border-color:#c98aff}.hpcard[href="nutrition.html"]:hover{border-color:#ffb43a}.hpcard[href="coaching.html"]:hover{border-color:#5fb0ff}
+/* petits textes plus lisibles */
+:root{--muted:#c0cac6}
+.muted{font-size:15px}
+.notice{color:#b3bdb9;font-size:14px}
+.footer{font-size:14px}
+.proof small{color:#aab5b1;font-size:13.5px}
+.brand small{font-size:11.5px}
+.eyebrow{font-size:13px}
+.card a{font-size:14px}
+.offre p,.offre .eco,.offre .prix span{font-size:14px}
+.avis figcaption,.pfig figcaption,.sheetfig figcaption,.zonehint,.tool label,.auth label{font-size:14px}
+.payconsent{font-size:13.5px;color:#d0d8d5}
+.pill{font-size:13.5px}
+.hpcard p{color:#cfd7d4;font-size:15px}
+.packnote,.infoprog li,.more li{font-size:15px}
+body.fam-force main .fcol.on{border-color:#8a2c35}body.fam-detente main .fcol.on{border-color:#245f8a}body.fam-muscu main .fcol.on{border-color:#6b3f93}body.fam-nutrition main .fcol.on{border-color:#8a6416}
+/* v63 fin */
+/* v63 mouvement debut : supprimer ce bloc (et celui de script.js) pour tout enlever */
+@media(prefers-reduced-motion:no-preference){
+.rv{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease}
+.rv.rv-in{opacity:1;transform:none}
+.btn{transition:transform .18s,box-shadow .18s,filter .18s}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.08)}
+.card,.philcard,.offre,.hubcard,.hpcard{transition:transform .25s,border-color .25s,box-shadow .25s}
+.card:hover,.philcard:hover,.hubcard:hover{transform:translateY(-3px)}
+.hubcard img,.hpcard img{transition:transform .5s ease}
+.hubcard:hover img,.hpcard:hover img{transform:scale(1.04)}
+.hubcard,.hpcard{overflow:hidden}
+}
+/* v63 mouvement fin */

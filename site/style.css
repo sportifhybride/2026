@@ -698,3 +698,4 @@ body.fam-force main .fcol.on{border-color:#8a2c35}body.fam-detente main .fcol.on
 .hubcard,.hpcard{overflow:hidden}
 }
 /* v63 mouvement fin */
+.hub-run img,.hpcard[href="coaching.html"] img{object-position:center 60%}

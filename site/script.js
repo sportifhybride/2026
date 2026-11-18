@@ -594,6 +594,7 @@ document.addEventListener('DOMContentLoaded', function(){
   function infoWA(){
     var msg = 'Bonjour Victor, voici ma commande.\n\nPrénom : ' + PROG.p + '\nNom : ' + PROG.n + '\nTéléphone : ' + PROG.t + '\nEmail : ' + PROG.m +
       '\nProgramme : ' + PROG.nom + '\nPrix : ' + PROG.prix + '\nMoyen de paiement : ' + PROG.methode + '\nRéférence : ' + PROG.ref;
+    if(window.HC_EXTRA) msg += '\n\n' + window.HC_EXTRA();
     return 'https://wa.me/33767927163?text=' + encodeURIComponent(msg);
   }
   /* affiche la confirmation, un bouton de secours cliquable, puis redirige */
@@ -619,7 +620,7 @@ document.addEventListener('DOMContentLoaded', function(){
   document.getElementById('payVirement')?.addEventListener('click', function(){
     PROG.methode = 'virement';
     valider().then(function(){
-      var msg = 'Bonjour Victor, je souhaite payer par virement bancaire.\n\nPrénom : ' + PROG.p + '\nNom : ' + PROG.n + '\nTéléphone : ' + PROG.t + '\nEmail : ' + PROG.m + '\nProgramme : ' + PROG.nom + '\nPrix : ' + PROG.prix + '\nRéférence : ' + PROG.ref + '\n\nPeux-tu m\'envoyer ton IBAN ?';
+      var msg = 'Bonjour Victor, je souhaite payer par virement bancaire.\n\nPrénom : ' + PROG.p + '\nNom : ' + PROG.n + '\nTéléphone : ' + PROG.t + '\nEmail : ' + PROG.m + '\nProgramme : ' + PROG.nom + '\nPrix : ' + PROG.prix + '\nRéférence : ' + PROG.ref + '\n\nPeux-tu m\'envoyer ton IBAN ?' + (window.HC_EXTRA ? '\n\n' + window.HC_EXTRA() : '');
       var url = 'https://wa.me/33767927163?text=' + encodeURIComponent(msg);
       document.getElementById('payOk').innerHTML = (PROG.enregistree ? '<p><b>Merci !</b> Commande <b>' + PROG.ref + '</b> enregistrée. Ouverture de WhatsApp…</p>' : '<p><b>Merci !</b> Ouverture de WhatsApp…</p>') +
         '<p class="muted">Envoie le message pré-rempli : je te réponds avec mon IBAN. Ton programme est envoyé dès que j\'ai reçu le virement.</p><p><a class="btn" href="' + url + '">OUVRIR WHATSAPP</a></p>';
@@ -1007,4 +1008,29 @@ window.HC_NEWSLETTER_URL = 'https://whatsapp.com/channel/0029VbDwRxTCBtxDxqQPFq1
     else if(b.classList.contains('qback')){ var k = hist.pop(); if(k) delete st[k]; suite(); }
   });
   suite();
+})();
+
+/* HC_EXTRA : formulaire du coaching sur mesure (réponses jointes au paiement et à WhatsApp) */
+(function(){
+  var f = document.getElementById('cmForm'); if(!f) return;
+  function v(id){ var e = document.getElementById(id); return e ? e.value.trim() : ''; }
+  window.HC_EXTRA = function(){
+    return 'COACHING SUR MESURE - mes réponses :\nSport : ' + (v('cmSport') || '-') + '\nNiveau : ' + v('cmNiveau') + '\nSéances par semaine : ' + v('cmSeances') +
+      '\nLieu : ' + v('cmLieu') + '\nBlessures / contraintes : ' + (v('cmBlessures') || '-') + '\nObjectif : ' + v('cmObjectif') + '\nMes attentes : ' + v('cmAttentes');
+  };
+  var msg = document.getElementById('cmMsg');
+  function valide(){
+    if(!v('cmObjectif') || !v('cmAttentes')){
+      msg.textContent = (window.hcT ? window.hcT('Indique ton objectif et tes attentes pour continuer.') : 'Indique ton objectif et tes attentes pour continuer.');
+      try{ msg.scrollIntoView({block:'center', behavior:'smooth'}); }catch(e){}
+      return false;
+    }
+    msg.textContent = ''; return true;
+  }
+  document.getElementById('cmSend').addEventListener('click', function(){
+    if(!valide()) return;
+    window.open('https://wa.me/33767927163?text=' + encodeURIComponent('Bonjour Victor, je souhaite un coaching sur mesure.\n\n' + window.HC_EXTRA()), '_blank', 'noopener');
+  });
+  var pay = document.querySelector('[data-pay]');
+  if(pay) pay.addEventListener('click', function(e){ if(!valide()){ e.stopImmediatePropagation(); e.preventDefault(); } }, true);
 })();

@@ -33,6 +33,7 @@ const CATALOG = {
   "Jambe De Fer + suivi": 20,
   "Popeye + suivi": 20,
   "Home Body + suivi": 20,
+  "Coaching sur mesure, 1 mois": 30,
   "Coaching course à pied, 2 mois": 30,
   "Coaching course à pied, 6 mois": 75,
   "Coaching course à pied, saison complète": 120

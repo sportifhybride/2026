@@ -219,9 +219,65 @@ async function adminOrders(request, env) {
   await checkAdmin(env, b.key);
   const { results } = await env.DB.prepare(
     `SELECT o.id, o.ref, o.produit, o.prix_eur, o.methode, o.status, o.created_at, o.paid_at, o.client_prenom, o.client_nom, o.client_tel, o.client_email, o.user_id,
-            rc.code AS code, rc.used_at AS code_used
-     FROM orders o LEFT JOIN review_codes rc ON rc.order_id = o.id ORDER BY o.id DESC LIMIT 500`).all();
+            rc.code AS code, rc.used_at AS code_used, od.start_date, od.end_date, od.reminded_at
+     FROM orders o LEFT JOIN review_codes rc ON rc.order_id = o.id LEFT JOIN order_dates od ON od.order_id = o.id ORDER BY o.id DESC LIMIT 500`).all();
+  for (const r of results) {
+    if (r.status === 'payee' && r.paid_at && !r.start_date) {
+      const mo = monthsFor(r.produit), st = String(r.paid_at).slice(0, 10);
+      if (mo) { r.start_date = st; r.end_date = addMonths(st, mo); }
+    }
+  }
   return json({ orders: results });
+}
+
+async function adminDates(request, env) {
+  const b = await readBody(request);
+  await checkAdmin(env, b.key);
+  const id = parseInt(b.id, 10);
+  if (!Number.isInteger(id)) throw new HttpError(400, 'Commande invalide.');
+  const st = b.start ? String(b.start) : null, en = b.end ? String(b.end) : null;
+  if ((st && !isDay(st)) || (en && !isDay(en))) throw new HttpError(400, 'Date invalide.');
+  await env.DB.prepare('INSERT INTO order_dates (order_id, start_date, end_date) VALUES (?, ?, ?) ON CONFLICT(order_id) DO UPDATE SET start_date = excluded.start_date, end_date = excluded.end_date').bind(id, st, en).run();
+  return json({ ok: true });
+}
+
+/* relance d'avis a la fin du programme : envoi par e-mail si configure, sinon on marque seulement comme relance */
+async function adminRemind(request, env) {
+  const b = await readBody(request);
+  await checkAdmin(env, b.key);
+  const ids = (Array.isArray(b.ids) ? b.ids : []).map((x) => parseInt(x, 10)).filter(Number.isInteger).slice(0, 100);
+  let sent = 0, marked = 0, error = null;
+  for (const id of ids) {
+    const o = await env.DB.prepare(`SELECT o.ref, o.produit, o.client_prenom, o.client_email, rc.code, rc.used_at FROM orders o JOIN review_codes rc ON rc.order_id = o.id WHERE o.id = ? AND o.status = 'payee'`).bind(id).first();
+    if (!o || o.used_at) continue;
+    if (b.send) {
+      const r = await sendMail(env, o.client_email, 'Ton avis sur ton programme · Hybride Coaching',
+        'Bonjour ' + (o.client_prenom || '') + ',\n\nTon programme (' + o.produit + ') est terminé. J’espère qu’il t’a plu !\nSi tu as 2 minutes, ton avis m’aide beaucoup.\n\nTon code (usage unique) : ' + o.code + '\nTu peux le saisir ici : ' + SITE + '/avis.html\n\nMerci, et à bientôt.\nVictor Castillo · Hybride Coaching');
+      if (!r.sent) { error = r.error || 'Envoi non configuré'; continue; }
+      sent++;
+    }
+    await env.DB.prepare('INSERT INTO order_dates (order_id, reminded_at) VALUES (?, datetime(\'now\')) ON CONFLICT(order_id) DO UPDATE SET reminded_at = datetime(\'now\')').bind(id).run();
+    marked++;
+  }
+  return json({ ok: true, sent, marked, error });
+}
+
+/* revenus hors commandes du site (ventes par WhatsApp, devis, etc.) */
+async function adminLedger(request, env) {
+  const b = await readBody(request);
+  await checkAdmin(env, b.key);
+  if (b.action === 'add') {
+    const amount = parseInt(b.amount, 10), label = clean(b.label, 100), day = String(b.day || '');
+    if (!Number.isInteger(amount) || amount === 0 || Math.abs(amount) > 100000) throw new HttpError(400, 'Montant invalide.');
+    if (!label) throw new HttpError(400, 'Ajoute une description.');
+    if (!isDay(day)) throw new HttpError(400, 'Date invalide.');
+    await env.DB.prepare('INSERT INTO ledger (label, amount_eur, day) VALUES (?, ?, ?)').bind(label, amount, day).run();
+  } else if (b.action === 'delete') {
+    const id = parseInt(b.id, 10); if (!Number.isInteger(id)) throw new HttpError(400, 'Ligne invalide.');
+    await env.DB.prepare('DELETE FROM ledger WHERE id = ?').bind(id).run();
+  }
+  const { results } = await env.DB.prepare('SELECT id, label, amount_eur, day FROM ledger ORDER BY day DESC, id DESC LIMIT 500').all();
+  return json({ ok: true, entries: results });
 }
 
 /* ---------- codes d'avis (usage unique) ---------- */
@@ -258,16 +314,6 @@ function parisDate(sqlUtc) {
   if (isNaN(d)) return String(sqlUtc);
   return d.toLocaleString('fr-FR', { timeZone: 'Europe/Paris', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).replace(',', ' à');
 }
-function e164(t) {
-  let d = String(t || '').replace(/[^\d+]/g, '');
-  if (!d) return '';
-  if (d[0] === '+') return '+' + d.slice(1).replace(/\D/g, '');
-  if (d.startsWith('00')) return '+' + d.slice(2);
-  if (d.length === 10 && d[0] === '0') return '+33' + d.slice(1);
-  if (d.length === 9) return '+33' + d;
-  return '+' + d.replace(/\D/g, '');
-}
-const noAccent = (t) => String(t).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[’‘]/g, "'").replace(/[^\x20-\x7E\n]/g, ' ');
 function recapText(o, code, site) {
   return ['Bonjour ' + (o.client_prenom || '') + ',', '', 'Merci pour ta commande chez Hybride Coaching !', '',
     'RÉCAPITULATIF DE COMMANDE', 'Référence : ' + o.ref, 'Produit : ' + o.produit, 'Prix : ' + o.prix_eur + ' €',
@@ -276,29 +322,35 @@ function recapText(o, code, site) {
     'Ton code pour laisser un avis (usage unique) : ' + code, 'Tu peux le saisir ici : ' + site + '/avis.html', '',
     'Victor Castillo · Hybride Coaching'].join('\n');
 }
-function recapSms(o, code, site) {
-  return noAccent('Hybride Coaching : commande ' + o.ref + ' (' + o.produit + ') ' + o.prix_eur + ' EUR, payee le ' + parisDate(o.paid_at) + ' (' + (PAYLBL[o.methode] || o.methode || '-') + '). Code avis (usage unique) : ' + code + ' sur ' + site.replace('https://', '') + '/avis.html');
-}
-/* regle : telephone si fourni (SMS), sinon e-mail */
-async function sendRecap(env, o, code, origin) {
-  const site = 'https://sportifhybride.com';
+/* tous les recapitulatifs partent par e-mail (service Resend, actif seulement si les cles sont configurees) */
+async function sendMail(env, to, subject, text) {
+  if (!to || !env.RESEND_API_KEY || !env.MAIL_FROM) return { sent: null };
   try {
-    if (o.client_tel && env.TWILIO_SID && env.TWILIO_TOKEN && (env.TWILIO_FROM || env.TWILIO_SERVICE)) {
-      const f = new URLSearchParams({ To: e164(o.client_tel), Body: recapSms(o, code, site) });
-      if (env.TWILIO_SERVICE) f.set('MessagingServiceSid', env.TWILIO_SERVICE); else f.set('From', env.TWILIO_FROM);
-      const r = await fetch('https://api.twilio.com/2010-04-01/Accounts/' + env.TWILIO_SID + '/Messages.json', {
-        method: 'POST', headers: { authorization: 'Basic ' + btoa(env.TWILIO_SID + ':' + env.TWILIO_TOKEN), 'content-type': 'application/x-www-form-urlencoded' }, body: f });
-      return r.ok ? { sent: 'sms' } : { sent: null, error: 'SMS refusé (' + r.status + ')' };
-    }
-    if (!o.client_tel && o.client_email && env.RESEND_API_KEY && env.MAIL_FROM) {
-      const r = await fetch('https://api.resend.com/emails', {
-        method: 'POST', headers: { authorization: 'Bearer ' + env.RESEND_API_KEY, 'content-type': 'application/json' },
-        body: JSON.stringify({ from: env.MAIL_FROM, to: [o.client_email], subject: 'Ta commande ' + o.ref + ' · Hybride Coaching', text: recapText(o, code, site) }) });
-      return r.ok ? { sent: 'email' } : { sent: null, error: 'E-mail refusé (' + r.status + ')' };
-    }
-    return { sent: null };
+    const r = await fetch('https://api.resend.com/emails', {
+      method: 'POST', headers: { authorization: 'Bearer ' + env.RESEND_API_KEY, 'content-type': 'application/json' },
+      body: JSON.stringify({ from: env.MAIL_FROM, to: [to], subject, text }) });
+    return r.ok ? { sent: 'email' } : { sent: null, error: 'E-mail refusé (' + r.status + ')' };
   } catch (e) { return { sent: null, error: 'Envoi impossible' }; }
 }
+const SITE = 'https://sportifhybride.com';
+async function sendRecap(env, o, code) {
+  return sendMail(env, o.client_email, 'Ta commande ' + o.ref + ' · Hybride Coaching', recapText(o, code, SITE));
+}
+function monthsFor(produit) {
+  if (/^Coaching course à pied, 2 mois/.test(produit)) return 2;
+  if (/^Coaching course à pied, 6 mois/.test(produit)) return 6;
+  if (/^Coaching course à pied, saison/.test(produit)) return 12;
+  if (/^Coaching sur mesure/.test(produit)) return 1;
+  if (/^(Formation PDF|Nutrition)/.test(produit)) return null;
+  return 2; /* programmes PDF : 2 mois minimum */
+}
+function addMonths(day, n) {
+  const d = new Date(day + 'T00:00:00Z'); if (isNaN(d)) return null;
+  const y = d.getUTCFullYear(), m = d.getUTCMonth() + n, dd = d.getUTCDate();
+  const e = new Date(Date.UTC(y, m, 1)); const last = new Date(Date.UTC(e.getUTCFullYear(), e.getUTCMonth() + 1, 0)).getUTCDate();
+  e.setUTCDate(Math.min(dd, last)); return e.toISOString().slice(0, 10);
+}
+const isDay = (v) => /^\d{4}-\d{2}-\d{2}$/.test(String(v || '')) && !isNaN(new Date(v + 'T00:00:00Z'));
 
 async function adminMark(request, env) {
   const b = await readBody(request);
@@ -315,6 +367,9 @@ async function adminMark(request, env) {
   if (status === 'payee') {
     code = await codeForOrder(env, id);
     if (before.status !== 'payee') {
+      const o0 = await env.DB.prepare('SELECT produit, paid_at FROM orders WHERE id = ?').bind(id).first();
+      const mo = monthsFor(o0.produit), st = String(o0.paid_at).slice(0, 10);
+      if (mo) await env.DB.prepare('INSERT OR REPLACE INTO order_dates (order_id, start_date, end_date) VALUES (?, ?, ?)').bind(id, st, addMonths(st, mo)).run();
       const o = await env.DB.prepare('SELECT ref, produit, prix_eur, methode, created_at, paid_at, client_prenom, client_tel, client_email FROM orders WHERE id = ?').bind(id).first();
       const r = await sendRecap(env, o, code);
       sent = r.sent; sendError = r.error || null;
@@ -402,12 +457,19 @@ const SCHEMA = [
   "CREATE INDEX IF NOT EXISTS idx_fails ON login_fails(email, ts)",
   "CREATE TABLE IF NOT EXISTS review_codes (id INTEGER PRIMARY KEY AUTOINCREMENT, code TEXT NOT NULL UNIQUE, order_id INTEGER, note TEXT, created_at TEXT NOT NULL DEFAULT (datetime('now')), used_at TEXT)",
   "CREATE TABLE IF NOT EXISTS reviews (id INTEGER PRIMARY KEY AUTOINCREMENT, code_id INTEGER, prenom TEXT NOT NULL, nom TEXT NOT NULL, age INTEGER, programme TEXT NOT NULL, rating INTEGER NOT NULL, comment TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'pending', created_at TEXT NOT NULL DEFAULT (datetime('now')))",
-  "CREATE INDEX IF NOT EXISTS idx_reviews_status ON reviews(status)"
+  "CREATE INDEX IF NOT EXISTS idx_reviews_status ON reviews(status)",
+  "CREATE TABLE IF NOT EXISTS order_dates (order_id INTEGER PRIMARY KEY, start_date TEXT, end_date TEXT, reminded_at TEXT)",
+  "CREATE TABLE IF NOT EXISTS ledger (id INTEGER PRIMARY KEY AUTOINCREMENT, label TEXT NOT NULL, amount_eur INTEGER NOT NULL, day TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT (datetime('now')))"
 ];
 let schemaReady = false;
 async function ensureSchema(env) {
   if (schemaReady) return;
-  try { await env.DB.batch(SCHEMA.map((q) => env.DB.prepare(q))); schemaReady = true; }
+  try {
+    await env.DB.batch(SCHEMA.map((q) => env.DB.prepare(q)));
+    const seed = await env.DB.prepare("INSERT OR IGNORE INTO settings (key, value) VALUES ('seed_ledger_v68', '1')").run();
+    if (seed.meta && seed.meta.changes === 1) await env.DB.prepare('INSERT INTO ledger (label, amount_eur, day) VALUES (?, ?, ?)').bind('Site Pro + vendu avant la mise en ligne de l’administration', 140, '2026-11-21').run();
+    schemaReady = true;
+  }
   catch (e) { console.error('ensureSchema', e && e.message); }
 }
 
@@ -438,6 +500,9 @@ export async function onRequest(context) {
       if (path === '/admin/mark') return await adminMark(request, env);
       if (path === '/review') return await postReview(request, env);
       if (path === '/admin/code') return await adminCodeNew(request, env);
+      if (path === '/admin/dates') return await adminDates(request, env);
+      if (path === '/admin/remind') return await adminRemind(request, env);
+      if (path === '/admin/ledger') return await adminLedger(request, env);
       if (path === '/admin/codes') return await adminCodes(request, env);
       if (path === '/admin/reviews') return await adminReviews(request, env);
       if (path === '/admin/review-set') return await adminReviewSet(request, env);

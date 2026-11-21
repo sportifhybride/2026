@@ -563,6 +563,7 @@ document.addEventListener('DOMContentLoaded', function(){
     var t = document.getElementById('payTel').value.trim();
     var m = document.getElementById('payMail').value.trim();
     if(!p || !n || !t || !m){ erreur('Renseigne ton prénom, ton nom, ton téléphone et ton email pour continuer.'); return Promise.reject(); }
+    if(!/^[^\s@]{1,64}@[^\s@]{1,200}\.[^\s@]{2,}$/.test(m)){ erreur('Entre une adresse e-mail valide : ton récapitulatif de commande y sera envoyé.'); return Promise.reject(); }
     var cons = document.getElementById('payConsent');
     if(cons && !cons.checked){ erreur('Coche la case pour confirmer l’envoi immédiat du contenu et la renonciation au droit de rétractation.'); return Promise.reject(); }
     var etape = Promise.resolve();

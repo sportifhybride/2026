@@ -1049,3 +1049,43 @@ setTimeout(function(){els.forEach(function(e){e.classList.add('rv-in')})},6000);
 addEventListener('beforeprint',function(){els.forEach(function(e){e.classList.add('rv-in')})});
 }catch(e){}})();
 /* v63 mouvement fin */
+
+/* HC_AVIS : avis clients (code a usage unique) */
+(function(){ try{
+  var f=document.getElementById('avisForm'); if(!f) return;
+  var t=function(x){ return window.hcT?window.hcT(x):x; };
+  var msg=document.getElementById('avMsg'), go=document.getElementById('avGo'), box=document.getElementById('avisClients');
+  var STAR='<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"/></svg>';
+  function say(x,k){ msg.textContent=x; msg.className='avmsg '+(k||''); }
+  function draw(list){
+    if(!list||!list.length) return; box.hidden=false; box.innerHTML='';
+    list.forEach(function(r){
+      var fg=document.createElement('figure'); fg.className='avis';
+      var st=document.createElement('div'); st.className='stars'; st.setAttribute('role','img'); st.setAttribute('aria-label',r.rating+'/5'); st.innerHTML=new Array(r.rating+1).join(STAR); fg.appendChild(st);
+      var bq=document.createElement('blockquote'), p=document.createElement('p'); p.textContent='« '+r.comment+' »'; bq.appendChild(p); fg.appendChild(bq);
+      var fc=document.createElement('figcaption'), b=document.createElement('b'), sp=document.createElement('span');
+      b.textContent=r.prenom+' '+r.nom+', '+r.age+' '+t('ans'); sp.textContent=t(r.programme); fc.appendChild(b); fc.appendChild(sp); fg.appendChild(fc); box.appendChild(fg);
+    });
+  }
+  fetch('/api/reviews',{credentials:'same-origin'}).then(function(r){return r.ok?r.json():null}).then(function(d){ if(d) draw(d.reviews); }).catch(function(){});
+  f.addEventListener('submit',function(e){
+    e.preventDefault();
+    var d={}; ['prenom','nom','age','programme','comment','code','website'].forEach(function(n){ d[n]=f.elements[n].value; });
+    var rt=f.querySelector('input[name=rating]:checked'); d.rating=rt?rt.value:'';
+    if(!d.prenom.trim()||!d.nom.trim()) return say(t('Renseigne ton prénom et ton nom.'),'err');
+    if(!d.age) return say(t('Renseigne ton âge.'),'err');
+    if(!d.programme) return say(t('Choisis le programme concerné.'),'err');
+    if(!d.rating) return say(t('Choisis une note de 1 à 5 étoiles.'),'err');
+    if(d.comment.trim().length<10) return say(t('Écris un commentaire (au moins 10 caractères).'),'err');
+    if(!d.code.trim()) return say(t('Entre ton code d\'avis.'),'err');
+    go.disabled=true; say(t('Envoi en cours…'));
+    fetch('/api/review',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify(d)})
+      .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; },function(){ return {ok:false,j:{}}; }); })
+      .then(function(x){
+        go.disabled=false;
+        if(x.ok){ f.reset(); say(t('Merci ! Ton avis a bien été envoyé. Il sera publié après vérification.'),'ok'); }
+        else say(t(x.j&&x.j.error?x.j.error.replace(/\s*\[diagnostic.*$/,''):'Une erreur est survenue. Réessaie dans un instant.'),'err');
+      })
+      .catch(function(){ go.disabled=false; say(t('Impossible de joindre le serveur. Réessaie dans un instant.'),'err'); });
+  });
+}catch(e){} })();

@@ -47,3 +47,10 @@ Pourquoi GitHub : l'envoi par glisser-déposer de Cloudflare Pages ne prend PAS 
 - Serveur : `functions/api/[[path]].js` contient les nouveaux prix (clés « … + suivi », Home Body, Nutrition seul 10 €).
 - Création de site : rubrique à part (menu après Outils, bandeaux, pied de page).
 - Pages légales réécrites ; `_headers` renforcé (CSP, HSTS…).
+
+## Avis clients et envoi automatique (v67)
+- Le code d'avis (AV-XXXX-XXXX, usage unique, sans date limite) se crée quand tu cliques « Payée » dans /admin.
+- Envoi automatique (facultatif) : téléphone fourni = SMS, sinon e-mail. Il s'active seulement si ces variables existent (Pages → Settings → Variables and Secrets) :
+  - SMS (Twilio) : TWILIO_SID, TWILIO_TOKEN, TWILIO_FROM (ou TWILIO_SERVICE)
+  - E-mail (Resend) : RESEND_API_KEY, MAIL_FROM (ex. `Victor <contact@sportifhybride.com>`, domaine à vérifier chez Resend)
+- Sans ces variables, /admin affiche des boutons WhatsApp / SMS / E-mail avec le message prêt à envoyer.

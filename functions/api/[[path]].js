@@ -218,9 +218,86 @@ async function adminOrders(request, env) {
   const b = await readBody(request);
   await checkAdmin(env, b.key);
   const { results } = await env.DB.prepare(
-    `SELECT id, ref, produit, prix_eur, methode, status, created_at, paid_at, client_prenom, client_nom, client_tel, client_email, user_id
-     FROM orders ORDER BY id DESC LIMIT 300`).all();
+    `SELECT o.id, o.ref, o.produit, o.prix_eur, o.methode, o.status, o.created_at, o.paid_at, o.client_prenom, o.client_nom, o.client_tel, o.client_email, o.user_id,
+            rc.code AS code, rc.used_at AS code_used
+     FROM orders o LEFT JOIN review_codes rc ON rc.order_id = o.id ORDER BY o.id DESC LIMIT 500`).all();
   return json({ orders: results });
+}
+
+/* ---------- codes d'avis (usage unique) ---------- */
+const CODE_ALPHA = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+function genCode() {
+  const a = crypto.getRandomValues(new Uint8Array(8));
+  let t = '';
+  for (const x of a) t += CODE_ALPHA[x % 32];
+  return 'AV-' + t.slice(0, 4) + '-' + t.slice(4);
+}
+async function insertCode(env, orderId, note) {
+  for (let i = 0; i < 6; i++) {
+    const c = genCode();
+    try { await env.DB.prepare('INSERT INTO review_codes (code, order_id, note) VALUES (?, ?, ?)').bind(c, orderId, note || null).run(); return c; }
+    catch (e) { /* collision improbable : on retente */ }
+  }
+  throw new Error('code non genere');
+}
+async function codeForOrder(env, orderId) {
+  const ex = await env.DB.prepare('SELECT code FROM review_codes WHERE order_id = ?').bind(orderId).first();
+  return ex ? ex.code : await insertCode(env, orderId, null);
+}
+function normCode(v) {
+  const r = String(v || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  return (r.length === 10 && r.startsWith('AV')) ? 'AV-' + r.slice(2, 6) + '-' + r.slice(6) : '';
+}
+
+
+/* ---------- envoi automatique du recapitulatif (actif seulement si les cles sont configurees) ---------- */
+const PAYLBL = { paypal: 'PayPal', revolut: 'Revolut', virement: 'Virement bancaire' };
+function parisDate(sqlUtc) {
+  if (!sqlUtc) return '';
+  const d = new Date(String(sqlUtc).replace(' ', 'T') + 'Z');
+  if (isNaN(d)) return String(sqlUtc);
+  return d.toLocaleString('fr-FR', { timeZone: 'Europe/Paris', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).replace(',', ' à');
+}
+function e164(t) {
+  let d = String(t || '').replace(/[^\d+]/g, '');
+  if (!d) return '';
+  if (d[0] === '+') return '+' + d.slice(1).replace(/\D/g, '');
+  if (d.startsWith('00')) return '+' + d.slice(2);
+  if (d.length === 10 && d[0] === '0') return '+33' + d.slice(1);
+  if (d.length === 9) return '+33' + d;
+  return '+' + d.replace(/\D/g, '');
+}
+const noAccent = (t) => String(t).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[’‘]/g, "'").replace(/[^\x20-\x7E\n]/g, ' ');
+function recapText(o, code, site) {
+  return ['Bonjour ' + (o.client_prenom || '') + ',', '', 'Merci pour ta commande chez Hybride Coaching !', '',
+    'RÉCAPITULATIF DE COMMANDE', 'Référence : ' + o.ref, 'Produit : ' + o.produit, 'Prix : ' + o.prix_eur + ' €',
+    'Mode de paiement : ' + (PAYLBL[o.methode] || o.methode || '-'),
+    'Commande passée le : ' + parisDate(o.created_at), 'Paiement confirmé le : ' + parisDate(o.paid_at), '',
+    'Ton code pour laisser un avis (usage unique) : ' + code, 'Tu peux le saisir ici : ' + site + '/avis.html', '',
+    'Victor Castillo · Hybride Coaching'].join('\n');
+}
+function recapSms(o, code, site) {
+  return noAccent('Hybride Coaching : commande ' + o.ref + ' (' + o.produit + ') ' + o.prix_eur + ' EUR, payee le ' + parisDate(o.paid_at) + ' (' + (PAYLBL[o.methode] || o.methode || '-') + '). Code avis (usage unique) : ' + code + ' sur ' + site.replace('https://', '') + '/avis.html');
+}
+/* regle : telephone si fourni (SMS), sinon e-mail */
+async function sendRecap(env, o, code, origin) {
+  const site = 'https://sportifhybride.com';
+  try {
+    if (o.client_tel && env.TWILIO_SID && env.TWILIO_TOKEN && (env.TWILIO_FROM || env.TWILIO_SERVICE)) {
+      const f = new URLSearchParams({ To: e164(o.client_tel), Body: recapSms(o, code, site) });
+      if (env.TWILIO_SERVICE) f.set('MessagingServiceSid', env.TWILIO_SERVICE); else f.set('From', env.TWILIO_FROM);
+      const r = await fetch('https://api.twilio.com/2010-04-01/Accounts/' + env.TWILIO_SID + '/Messages.json', {
+        method: 'POST', headers: { authorization: 'Basic ' + btoa(env.TWILIO_SID + ':' + env.TWILIO_TOKEN), 'content-type': 'application/x-www-form-urlencoded' }, body: f });
+      return r.ok ? { sent: 'sms' } : { sent: null, error: 'SMS refusé (' + r.status + ')' };
+    }
+    if (!o.client_tel && o.client_email && env.RESEND_API_KEY && env.MAIL_FROM) {
+      const r = await fetch('https://api.resend.com/emails', {
+        method: 'POST', headers: { authorization: 'Bearer ' + env.RESEND_API_KEY, 'content-type': 'application/json' },
+        body: JSON.stringify({ from: env.MAIL_FROM, to: [o.client_email], subject: 'Ta commande ' + o.ref + ' · Hybride Coaching', text: recapText(o, code, site) }) });
+      return r.ok ? { sent: 'email' } : { sent: null, error: 'E-mail refusé (' + r.status + ')' };
+    }
+    return { sent: null };
+  } catch (e) { return { sent: null, error: 'Envoi impossible' }; }
 }
 
 async function adminMark(request, env) {
@@ -230,8 +307,87 @@ async function adminMark(request, env) {
   if (!['en_attente', 'payee', 'annulee'].includes(status)) throw new HttpError(400, 'Statut invalide.');
   const id = parseInt(b.id, 10);
   if (!Number.isInteger(id)) throw new HttpError(400, 'Commande invalide.');
-  await env.DB.prepare(`UPDATE orders SET status = ?, paid_at = CASE WHEN ? = 'payee' THEN datetime('now') ELSE NULL END WHERE id = ?`)
+  const before = await env.DB.prepare('SELECT status FROM orders WHERE id = ?').bind(id).first();
+  if (!before) throw new HttpError(404, 'Commande introuvable.');
+  await env.DB.prepare(`UPDATE orders SET status = ?, paid_at = CASE WHEN ? = 'payee' THEN COALESCE(paid_at, datetime('now')) ELSE NULL END WHERE id = ?`)
     .bind(status, status, id).run();
+  let code = null, sent = null, sendError = null;
+  if (status === 'payee') {
+    code = await codeForOrder(env, id);
+    if (before.status !== 'payee') {
+      const o = await env.DB.prepare('SELECT ref, produit, prix_eur, methode, created_at, paid_at, client_prenom, client_tel, client_email FROM orders WHERE id = ?').bind(id).first();
+      const r = await sendRecap(env, o, code);
+      sent = r.sent; sendError = r.error || null;
+    }
+  } else await env.DB.prepare('DELETE FROM review_codes WHERE order_id = ? AND used_at IS NULL').bind(id).run();
+  return json({ ok: true, code, sent, sendError });
+}
+
+async function adminCodeNew(request, env) {
+  const b = await readBody(request);
+  await checkAdmin(env, b.key);
+  const code = await insertCode(env, null, clean(b.note, 100));
+  return json({ ok: true, code });
+}
+async function adminCodes(request, env) {
+  const b = await readBody(request);
+  await checkAdmin(env, b.key);
+  const { results } = await env.DB.prepare(
+    `SELECT rc.code, rc.note, rc.created_at, rc.used_at, o.ref FROM review_codes rc LEFT JOIN orders o ON o.id = rc.order_id ORDER BY rc.id DESC LIMIT 500`).all();
+  return json({ codes: results });
+}
+async function adminReviews(request, env) {
+  const b = await readBody(request);
+  await checkAdmin(env, b.key);
+  const { results } = await env.DB.prepare(
+    `SELECT id, prenom, nom, age, programme, rating, comment, status, created_at FROM reviews ORDER BY CASE status WHEN 'pending' THEN 0 ELSE 1 END, id DESC LIMIT 500`).all();
+  return json({ reviews: results });
+}
+async function adminReviewSet(request, env) {
+  const b = await readBody(request);
+  await checkAdmin(env, b.key);
+  const id = parseInt(b.id, 10);
+  if (!Number.isInteger(id)) throw new HttpError(400, 'Avis invalide.');
+  const act = String(b.action);
+  if (act === 'delete') await env.DB.prepare('DELETE FROM reviews WHERE id = ?').bind(id).run();
+  else if (act === 'publish') await env.DB.prepare("UPDATE reviews SET status = 'published' WHERE id = ?").bind(id).run();
+  else if (act === 'reject') await env.DB.prepare("UPDATE reviews SET status = 'rejected' WHERE id = ?").bind(id).run();
+  else throw new HttpError(400, 'Action invalide.');
+  return json({ ok: true });
+}
+
+/* ---------- avis publics ---------- */
+async function publicReviews(env) {
+  const { results } = await env.DB.prepare(
+    `SELECT prenom, nom, age, programme, rating, comment, created_at FROM reviews WHERE status = 'published' ORDER BY id DESC LIMIT 100`).all();
+  return json({ reviews: results.map((r) => ({ prenom: r.prenom, nom: (r.nom || '').slice(0, 1).toUpperCase() + '.', age: r.age, programme: r.programme, rating: r.rating, comment: r.comment, date: String(r.created_at || '').slice(0, 10) })) });
+}
+async function postReview(request, env) {
+  const b = await readBody(request);
+  if (b.website) return json({ ok: true });
+  const ip = request.headers.get('cf-connecting-ip') || 'ip';
+  const key = 'rv:' + ip;
+  if (await tooManyFails(env, key, 8)) throw new HttpError(429, 'Trop d’essais. Reessaie dans 15 minutes.');
+  const prenom = clean(b.prenom, 40), nom = clean(b.nom, 40), programme = clean(b.programme, 80);
+  const age = parseInt(b.age, 10), rating = parseInt(b.rating, 10);
+  const comment = clean(b.comment, 1200);
+  const code = normCode(b.code);
+  if (!prenom || !nom) throw new HttpError(400, 'Renseigne ton prénom et ton nom.');
+  if (!Number.isInteger(age) || age < 10 || age > 99) throw new HttpError(400, 'Renseigne ton âge.');
+  if (!programme) throw new HttpError(400, 'Choisis le programme concerné.');
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5) throw new HttpError(400, 'Choisis une note de 1 à 5 étoiles.');
+  if (comment.length < 10) throw new HttpError(400, 'Écris un commentaire (au moins 10 caractères).');
+  if (!code) { await addFail(env, key); throw new HttpError(400, 'Code invalide ou déjà utilisé.'); }
+  const row = await env.DB.prepare('SELECT id FROM review_codes WHERE code = ?').bind(code).first();
+  const claim = row ? await env.DB.prepare("UPDATE review_codes SET used_at = datetime('now') WHERE id = ? AND used_at IS NULL").bind(row.id).run() : null;
+  if (!claim || claim.meta.changes !== 1) { await addFail(env, key); throw new HttpError(400, 'Code invalide ou déjà utilisé.'); }
+  try {
+    await env.DB.prepare('INSERT INTO reviews (code_id, prenom, nom, age, programme, rating, comment) VALUES (?, ?, ?, ?, ?, ?, ?)')
+      .bind(row.id, prenom, nom, age, programme, rating, comment).run();
+  } catch (e) {
+    await env.DB.prepare('UPDATE review_codes SET used_at = NULL WHERE id = ?').bind(row.id).run();
+    throw e;
+  }
   return json({ ok: true });
 }
 
@@ -243,7 +399,10 @@ const SCHEMA = [
   "CREATE INDEX IF NOT EXISTS idx_orders_user ON orders(user_id)",
   "CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)",
   "CREATE TABLE IF NOT EXISTS login_fails (email TEXT NOT NULL, ts INTEGER NOT NULL)",
-  "CREATE INDEX IF NOT EXISTS idx_fails ON login_fails(email, ts)"
+  "CREATE INDEX IF NOT EXISTS idx_fails ON login_fails(email, ts)",
+  "CREATE TABLE IF NOT EXISTS review_codes (id INTEGER PRIMARY KEY AUTOINCREMENT, code TEXT NOT NULL UNIQUE, order_id INTEGER, note TEXT, created_at TEXT NOT NULL DEFAULT (datetime('now')), used_at TEXT)",
+  "CREATE TABLE IF NOT EXISTS reviews (id INTEGER PRIMARY KEY AUTOINCREMENT, code_id INTEGER, prenom TEXT NOT NULL, nom TEXT NOT NULL, age INTEGER, programme TEXT NOT NULL, rating INTEGER NOT NULL, comment TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'pending', created_at TEXT NOT NULL DEFAULT (datetime('now')))",
+  "CREATE INDEX IF NOT EXISTS idx_reviews_status ON reviews(status)"
 ];
 let schemaReady = false;
 async function ensureSchema(env) {
@@ -268,6 +427,7 @@ export async function onRequest(context) {
       if (origin && new URL(origin).host !== new URL(request.url).host) throw new HttpError(403, 'Origine refusee.');
     }
     if (method === 'GET' && path === '/me') return await me(request, env);
+    if (method === 'GET' && path === '/reviews') return await publicReviews(env);
     if (method === 'POST') {
       if (path === '/register') return await register(request, env);
       if (path === '/login') return await login(request, env);
@@ -276,6 +436,11 @@ export async function onRequest(context) {
       if (path === '/account/delete') return await deleteAccount(request, env);
       if (path === '/admin/orders') return await adminOrders(request, env);
       if (path === '/admin/mark') return await adminMark(request, env);
+      if (path === '/review') return await postReview(request, env);
+      if (path === '/admin/code') return await adminCodeNew(request, env);
+      if (path === '/admin/codes') return await adminCodes(request, env);
+      if (path === '/admin/reviews') return await adminReviews(request, env);
+      if (path === '/admin/review-set') return await adminReviewSet(request, env);
     }
     throw new HttpError(404, 'Introuvable.');
   } catch (e) {

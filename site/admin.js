@@ -92,12 +92,14 @@
   function enter(tok){KEY=tok;PW='';$('key').value='';$('code').value='';$('err').textContent='';loadOrders().then(function(){return loadReviews()}).catch(function(){})}
   $('go').onclick=function(){
     $('err').textContent='';
+    if(!$('setupBox').hidden){var a=$('npw').value,c=$('npw2').value;if(a.length<10){$('err').textContent='Choisis un mot de passe d\'au moins 10 caractères.';return}if(a!==c){$('err').textContent='Les deux mots de passe ne sont pas identiques.';return}post('/api/admin/setup',{password:a}).then(function(d){$('npw').value='';$('npw2').value='';enter(d.token)}).catch(function(e){$('err').textContent=e.message});return}
     if(!$('codeBox').hidden){post('/api/admin/verify',{password:PW,code:$('code').value}).then(function(d){enter(d.token)}).catch(function(e){$('err').textContent=e.message});return}
     PW=$('key').value;
-    post('/api/admin/login',{password:PW}).then(function(d){if(d.step==='ok')enter(d.token);else{$('codeBox').hidden=false;$('key').hidden=true;$('code').focus()}}).catch(function(e){$('err').textContent=e.message});
+    post('/api/admin/login',{password:PW}).then(function(d){if(d.step==='ok')enter(d.token);else if(d.step==='setup'){$('setupBox').hidden=false;$('key').hidden=true;$('npw').focus()}else{$('codeBox').hidden=false;$('key').hidden=true;$('code').focus()}}).catch(function(e){$('err').textContent=e.message});
   };
   $('key').onkeydown=function(e){if(e.key==='Enter')$('go').click()};
   $('code').onkeydown=function(e){if(e.key==='Enter')$('go').click()};
+  $('chgpw').onclick=function(){var n=$('newpw').value;if(n!==$('newpw2').value)return alert('Les deux mots de passe ne sont pas identiques.');call('/api/admin/password',{current:$('curpw').value,next:n}).then(function(){$('curpw').value='';$('newpw').value='';$('newpw2').value='';toast('Mot de passe changé')}).catch(function(x){alert(x.message)})};
   $('refresh').onclick=function(){loadOrders()};
   $('csv').onclick=csv;
   document.querySelector('.admtabs').onclick=function(e){var b=e.target.closest('button');if(b)tab(b.dataset.tab)};

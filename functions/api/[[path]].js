@@ -120,13 +120,30 @@ async function addFail(env, key) {
 /* ---------- administration ---------- */
 /* connexion administrateur : mot de passe (variable ADMIN_PASSWORD) + code a 3 chiffres envoye par e-mail (ADMIN_EMAIL, via Resend).
    Sans la double verification configuree, le mot de passe seul suffit. */
-const twoFaOn = (env) => !!(env.ADMIN_PASSWORD && env.ADMIN_EMAIL && env.RESEND_API_KEY && env.MAIL_FROM);
+const twoFaOn = (env) => !!(env.ADMIN_EMAIL && env.RESEND_API_KEY && env.MAIL_FROM);
+/* le mot de passe vient soit de la variable ADMIN_PASSWORD (Cloudflare), soit de la base (cree puis modifie depuis /admin) */
+async function storedPw(env) {
+  const r = await env.DB.prepare("SELECT value FROM settings WHERE key = 'admin_pw'").first();
+  try { return r ? JSON.parse(r.value) : null; } catch (e) { return null; }
+}
+async function pwConfigured(env) {
+  if (env.ADMIN_PASSWORD) return true;
+  if (await storedPw(env)) return true;
+  return !!(await env.DB.prepare("SELECT 1 AS x FROM settings WHERE key = 'admin_key_hash'").first());
+}
 async function passwordOk(env, pw) {
-  if (typeof pw !== 'string' || !pw) return false;
+  if (typeof pw !== 'string' || !pw || pw.length > 200) return false;
   if (env.ADMIN_PASSWORD) return safeEqual(await sha256hex(env.ADMIN_PASSWORD), await sha256hex(pw));
+  const st = await storedPw(env);
+  if (st) return safeEqual(st.h, await hashPassword(pw, unb64(st.s)));
   const row = await env.DB.prepare("SELECT value FROM settings WHERE key = 'admin_key_hash'").first();
   return !!(row && safeEqual(row.value, await sha256hex(pw)));
 }
+async function savePw(env, pw) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  await env.DB.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').bind('admin_pw', JSON.stringify({ s: b64(salt), h: await hashPassword(pw, salt) })).run();
+}
+const pwValid = (pw) => typeof pw === 'string' && pw.length >= 10 && pw.length <= 200;
 async function newAdminSession(env) {
   const token = 'S.' + hex(crypto.getRandomValues(new Uint8Array(24)));
   const exp = Date.now() + 8 * 3600 * 1000;
@@ -146,6 +163,7 @@ async function checkAdmin(env, key) {
 async function adminLogin(request, env) {
   const b = await readBody(request);
   if (await tooManyFails(env, '__admin__', 10)) throw new HttpError(429, 'Trop d’essais. Reessaie dans 15 minutes.');
+  if (!(await pwConfigured(env))) return json({ ok: true, step: 'setup' });
   if (!(await passwordOk(env, b.password))) { await addFail(env, '__admin__'); throw new HttpError(401, 'Mot de passe incorrect.'); }
   if (!twoFaOn(env)) return json({ ok: true, step: 'ok', token: await newAdminSession(env) });
   const code = String(crypto.getRandomValues(new Uint16Array(1))[0] % 1000).padStart(3, '0');
@@ -154,6 +172,28 @@ async function adminLogin(request, env) {
   if (!r.sent) throw new HttpError(502, 'Envoi du code impossible' + (r.error ? ' (' + r.error + ')' : '') + '.');
   return json({ ok: true, step: 'code' });
 }
+
+/* premiere utilisation : creation du mot de passe depuis /admin (possible seulement tant qu'aucun mot de passe n'existe) */
+async function adminSetup(request, env) {
+  const b = await readBody(request);
+  if (await pwConfigured(env)) throw new HttpError(403, 'Un mot de passe existe déjà.');
+  if (!pwValid(b.password)) throw new HttpError(400, 'Choisis un mot de passe d’au moins 10 caractères.');
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const ins = await env.DB.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)').bind('admin_pw', JSON.stringify({ s: b64(salt), h: await hashPassword(b.password, salt) })).run();
+  if (!ins.meta || ins.meta.changes !== 1) throw new HttpError(403, 'Un mot de passe existe déjà.');
+  return json({ ok: true, token: await newAdminSession(env) });
+}
+async function adminPassword(request, env) {
+  const b = await readBody(request);
+  await checkAdmin(env, b.key);
+  if (env.ADMIN_PASSWORD) throw new HttpError(400, 'Ton mot de passe est défini dans Cloudflare (ADMIN_PASSWORD) : change-le là-bas.');
+  if (!(await passwordOk(env, b.current))) { await addFail(env, '__admin__'); throw new HttpError(401, 'Mot de passe actuel incorrect.'); }
+  if (!pwValid(b.next)) throw new HttpError(400, 'Choisis un mot de passe d’au moins 10 caractères.');
+  await savePw(env, b.next);
+  await env.DB.prepare("DELETE FROM settings WHERE key LIKE 'adm_s_%' AND key != ?").bind('adm_s_' + await sha256hex(b.key)).run();
+  return json({ ok: true });
+}
+
 async function adminVerify(request, env) {
   const b = await readBody(request);
   if (await tooManyFails(env, '__admin__', 10)) throw new HttpError(429, 'Trop d’essais. Reessaie dans 15 minutes.');
@@ -547,6 +587,8 @@ export async function onRequest(context) {
       if (path === '/account/delete') return await deleteAccount(request, env);
       if (path === '/admin/login') return await adminLogin(request, env);
       if (path === '/admin/verify') return await adminVerify(request, env);
+      if (path === '/admin/setup') return await adminSetup(request, env);
+      if (path === '/admin/password') return await adminPassword(request, env);
       if (path === '/admin/orders') return await adminOrders(request, env);
       if (path === '/admin/mark') return await adminMark(request, env);
       if (path === '/review') return await postReview(request, env);

@@ -1065,15 +1065,16 @@ addEventListener('beforeprint',function(){els.forEach(function(e){e.classList.ad
       var st=document.createElement('div'); st.className='stars'; st.setAttribute('role','img'); st.setAttribute('aria-label',r.rating+'/5'); st.innerHTML=new Array(r.rating+1).join(STAR); fg.appendChild(st);
       var bq=document.createElement('blockquote'), p=document.createElement('p'); p.textContent='« '+r.comment+' »'; bq.appendChild(p); fg.appendChild(bq);
       var fc=document.createElement('figcaption'), b=document.createElement('b'), sp=document.createElement('span');
-      b.textContent=r.prenom+' '+r.nom+', '+r.age+' '+t('ans'); sp.textContent=t(r.programme); fc.appendChild(b); fc.appendChild(sp); fg.appendChild(fc); box.appendChild(fg);
+      b.textContent=r.prenom+', '+r.age+' '+t('ans'); sp.textContent=(r.sport?r.sport+' · ':'')+t(r.programme); fc.appendChild(b); fc.appendChild(sp); fg.appendChild(fc); box.appendChild(fg);
     });
   }
   fetch('/api/reviews',{credentials:'same-origin'}).then(function(r){return r.ok?r.json():null}).then(function(d){ if(d) draw(d.reviews); }).catch(function(){});
   f.addEventListener('submit',function(e){
     e.preventDefault();
-    var d={}; ['prenom','nom','age','programme','comment','code','website'].forEach(function(n){ d[n]=f.elements[n].value; });
+    var d={}; ['prenom','sport','age','programme','comment','code','website'].forEach(function(n){ d[n]=f.elements[n].value; });
     var rt=f.querySelector('input[name=rating]:checked'); d.rating=rt?rt.value:'';
-    if(!d.prenom.trim()||!d.nom.trim()) return say(t('Renseigne ton prénom et ton nom.'),'err');
+    if(!d.prenom.trim()) return say(t('Renseigne ton prénom.'),'err');
+    if(!d.sport.trim()) return say(t('Indique le sport que tu pratiques.'),'err');
     if(!d.age) return say(t('Renseigne ton âge.'),'err');
     if(!d.programme) return say(t('Choisis le programme concerné.'),'err');
     if(!d.rating) return say(t('Choisis une note de 1 à 5 étoiles.'),'err');

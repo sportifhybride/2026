@@ -68,7 +68,7 @@
   function loadReviews(){return call('/api/admin/reviews').then(function(d){
     var p=d.reviews.filter(function(r){return r.status==='pending'}).length;$('pendN').textContent=p?'('+p+')':'';
     $('revs').innerHTML=d.reviews.map(function(r){
-      return '<div class="rv'+(r.status==='pending'?' pend':'')+'"><b>'+esc(r.prenom+' '+r.nom)+', '+r.age+' ans</b> · '+esc(r.programme)+' · <span style="color:#ffb400">'+stars(r.rating)+'</span> · <i>'+esc(r.status==='pending'?'à valider':r.status==='published'?'publié':'refusé')+'</i> · '+esc(dt(r.created_at))
+      return '<div class="rv'+(r.status==='pending'?' pend':'')+'"><b>'+esc(r.prenom)+', '+r.age+' ans</b> · '+esc(r.sport||'')+' · '+esc(r.programme)+' · <span style="color:#ffb400">'+stars(r.rating)+'</span> · <i>'+esc(r.status==='pending'?'à valider':r.status==='published'?'publié':'refusé')+'</i> · '+esc(dt(r.created_at))
         +'<p>'+esc(r.comment)+'</p><button data-rv="'+r.id+'" data-act="publish">Publier</button><button data-rv="'+r.id+'" data-act="reject">Refuser</button><button data-rv="'+r.id+'" data-act="delete">Supprimer</button></div>';
     }).join('')||'<p class="muted">Aucun avis pour le moment.</p>';
   })}

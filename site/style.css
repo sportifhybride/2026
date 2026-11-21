@@ -727,7 +727,7 @@ body.fam-force main .fcol.on{border-color:#8a2c35}body.fam-detente main .fcol.on
 .monavis{margin:44px 0 10px}.avintro{max-width:720px;font-size:16px;margin:8px 0 20px}
 .avform{max-width:760px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px;display:grid;gap:16px}
 .avform label,.avlbl{display:grid;gap:6px;font-weight:700;font-size:14.5px;color:#d8e0dd}
-.avrow{display:grid;grid-template-columns:1fr 1fr 110px;gap:12px}
+.avrow{display:grid;grid-template-columns:1fr 110px;gap:12px}
 .avform input,.avform select,.avform textarea{width:100%;background:#0a100e;border:1px solid #2c3a36;color:var(--text);border-radius:10px;padding:12px 13px;font:inherit;font-weight:500}
 .avform input:focus,.avform select:focus,.avform textarea:focus{outline:2px solid var(--green);outline-offset:1px}
 .avform textarea{resize:vertical;min-height:120px}
@@ -744,5 +744,5 @@ body.fam-force main .fcol.on{border-color:#8a2c35}body.fam-detente main .fcol.on
 .avsmall{margin:0;font-size:14px}
 #avisClients{margin:0 0 34px}
 .avform .btn{justify-self:start}
-@media(max-width:640px){.avrow{grid-template-columns:1fr 1fr}.avrow label:nth-child(3){grid-column:1/-1}.avform{padding:18px}}
+@media(max-width:640px){.avrow{grid-template-columns:1fr 100px}.avform{padding:18px}}
 /* v67 fin */

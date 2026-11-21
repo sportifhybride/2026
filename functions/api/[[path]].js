@@ -395,7 +395,7 @@ async function adminReviews(request, env) {
   const b = await readBody(request);
   await checkAdmin(env, b.key);
   const { results } = await env.DB.prepare(
-    `SELECT id, prenom, nom, age, programme, rating, comment, status, created_at FROM reviews ORDER BY CASE status WHEN 'pending' THEN 0 ELSE 1 END, id DESC LIMIT 500`).all();
+    `SELECT id, prenom, age, sport, programme, rating, comment, status, created_at FROM reviews ORDER BY CASE status WHEN 'pending' THEN 0 ELSE 1 END, id DESC LIMIT 500`).all();
   return json({ reviews: results });
 }
 async function adminReviewSet(request, env) {
@@ -414,8 +414,8 @@ async function adminReviewSet(request, env) {
 /* ---------- avis publics ---------- */
 async function publicReviews(env) {
   const { results } = await env.DB.prepare(
-    `SELECT prenom, nom, age, programme, rating, comment, created_at FROM reviews WHERE status = 'published' ORDER BY id DESC LIMIT 100`).all();
-  return json({ reviews: results.map((r) => ({ prenom: r.prenom, nom: (r.nom || '').slice(0, 1).toUpperCase() + '.', age: r.age, programme: r.programme, rating: r.rating, comment: r.comment, date: String(r.created_at || '').slice(0, 10) })) });
+    `SELECT prenom, age, sport, programme, rating, comment, created_at FROM reviews WHERE status = 'published' ORDER BY id DESC LIMIT 100`).all();
+  return json({ reviews: results.map((r) => ({ prenom: r.prenom, age: r.age, sport: r.sport || '', programme: r.programme, rating: r.rating, comment: r.comment, date: String(r.created_at || '').slice(0, 10) })) });
 }
 async function postReview(request, env) {
   const b = await readBody(request);
@@ -423,11 +423,12 @@ async function postReview(request, env) {
   const ip = request.headers.get('cf-connecting-ip') || 'ip';
   const key = 'rv:' + ip;
   if (await tooManyFails(env, key, 8)) throw new HttpError(429, 'Trop d’essais. Reessaie dans 15 minutes.');
-  const prenom = clean(b.prenom, 40), nom = clean(b.nom, 40), programme = clean(b.programme, 80);
+  const prenom = clean(b.prenom, 40), sport = clean(b.sport, 60), programme = clean(b.programme, 80);
   const age = parseInt(b.age, 10), rating = parseInt(b.rating, 10);
   const comment = clean(b.comment, 1200);
   const code = normCode(b.code);
-  if (!prenom || !nom) throw new HttpError(400, 'Renseigne ton prénom et ton nom.');
+  if (!prenom) throw new HttpError(400, 'Renseigne ton prénom.');
+  if (!sport) throw new HttpError(400, 'Indique le sport que tu pratiques.');
   if (!Number.isInteger(age) || age < 10 || age > 99) throw new HttpError(400, 'Renseigne ton âge.');
   if (!programme) throw new HttpError(400, 'Choisis le programme concerné.');
   if (!Number.isInteger(rating) || rating < 1 || rating > 5) throw new HttpError(400, 'Choisis une note de 1 à 5 étoiles.');
@@ -437,8 +438,8 @@ async function postReview(request, env) {
   const claim = row ? await env.DB.prepare("UPDATE review_codes SET used_at = datetime('now') WHERE id = ? AND used_at IS NULL").bind(row.id).run() : null;
   if (!claim || claim.meta.changes !== 1) { await addFail(env, key); throw new HttpError(400, 'Code invalide ou déjà utilisé.'); }
   try {
-    await env.DB.prepare('INSERT INTO reviews (code_id, prenom, nom, age, programme, rating, comment) VALUES (?, ?, ?, ?, ?, ?, ?)')
-      .bind(row.id, prenom, nom, age, programme, rating, comment).run();
+    await env.DB.prepare('INSERT INTO reviews (code_id, prenom, nom, age, programme, rating, comment, sport) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
+      .bind(row.id, prenom, '', age, programme, rating, comment, sport).run();
   } catch (e) {
     await env.DB.prepare('UPDATE review_codes SET used_at = NULL WHERE id = ?').bind(row.id).run();
     throw e;
@@ -466,6 +467,7 @@ async function ensureSchema(env) {
   if (schemaReady) return;
   try {
     await env.DB.batch(SCHEMA.map((q) => env.DB.prepare(q)));
+    try { await env.DB.prepare('ALTER TABLE reviews ADD COLUMN sport TEXT').run(); } catch (e) { /* colonne deja presente */ }
     const seed = await env.DB.prepare("INSERT OR IGNORE INTO settings (key, value) VALUES ('seed_ledger_v68', '1')").run();
     if (seed.meta && seed.meta.changes === 1) await env.DB.prepare('INSERT INTO ledger (label, amount_eur, day) VALUES (?, ?, ?)').bind('Site Pro + vendu avant la mise en ligne de l’administration', 140, '2026-11-21').run();
     schemaReady = true;

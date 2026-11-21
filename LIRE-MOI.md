@@ -53,3 +53,10 @@ Pourquoi GitHub : l'envoi par glisser-déposer de Cloudflare Pages ne prend PAS 
 - Le code d'avis (AV-XXXX-XXXX, usage unique, sans date limite) se crée quand tu cliques « Payée ».
 - Tous les récapitulatifs partent par e-mail. Envoi automatique (gratuit) via Resend : variables RESEND_API_KEY et MAIL_FROM (ex. `Victor <contact@sportifhybride.com>`, domaine à vérifier chez Resend) dans Pages → Settings → Variables and Secrets. Sans elles, utilise le bouton E-mail de /admin.
 - Le compteur démarre avec 140 € (site Pro + déjà vendu), ajouté une seule fois.
+
+## Connexion à /admin (v70)
+Variables à créer dans Pages → Settings → Variables and Secrets (Production) :
+- `ADMIN_PASSWORD` : ton mot de passe d'administration (tu le tapes toi-même dans Cloudflare).
+- `ADMIN_EMAIL` : l'adresse qui reçoit le code à 3 chiffres.
+- `RESEND_API_KEY` et `MAIL_FROM` : pour l'envoi des e-mails.
+Si `ADMIN_EMAIL`, `RESEND_API_KEY` ou `MAIL_FROM` manque, /admin demande seulement le mot de passe. Si l'envoi du code échoue, supprime `ADMIN_EMAIL` le temps de réparer.

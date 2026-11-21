@@ -118,11 +118,58 @@ async function addFail(env, key) {
 }
 
 /* ---------- administration ---------- */
+/* connexion administrateur : mot de passe (variable ADMIN_PASSWORD) + code a 3 chiffres envoye par e-mail (ADMIN_EMAIL, via Resend).
+   Sans la double verification configuree, le mot de passe seul suffit. */
+const twoFaOn = (env) => !!(env.ADMIN_PASSWORD && env.ADMIN_EMAIL && env.RESEND_API_KEY && env.MAIL_FROM);
+async function passwordOk(env, pw) {
+  if (typeof pw !== 'string' || !pw) return false;
+  if (env.ADMIN_PASSWORD) return safeEqual(await sha256hex(env.ADMIN_PASSWORD), await sha256hex(pw));
+  const row = await env.DB.prepare("SELECT value FROM settings WHERE key = 'admin_key_hash'").first();
+  return !!(row && safeEqual(row.value, await sha256hex(pw)));
+}
+async function newAdminSession(env) {
+  const token = 'S.' + hex(crypto.getRandomValues(new Uint8Array(24)));
+  const exp = Date.now() + 8 * 3600 * 1000;
+  await env.DB.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').bind('adm_s_' + await sha256hex(token), String(exp)).run();
+  if (Math.random() < 0.1) await env.DB.prepare("DELETE FROM settings WHERE key LIKE 'adm_s_%' AND CAST(value AS INTEGER) < ?").bind(Date.now()).run();
+  return token;
+}
 async function checkAdmin(env, key) {
   if (await tooManyFails(env, '__admin__', 10)) throw new HttpError(429, 'Trop d’essais. Reessaie dans 15 minutes.');
-  const row = await env.DB.prepare("SELECT value FROM settings WHERE key = 'admin_key_hash'").first();
-  const ok = row && typeof key === 'string' && safeEqual(row.value, await sha256hex(key));
-  if (!ok) { await addFail(env, '__admin__'); throw new HttpError(401, 'Cle incorrecte.'); }
+  let ok = false;
+  if (typeof key === 'string' && key.startsWith('S.')) {
+    const row = await env.DB.prepare('SELECT value FROM settings WHERE key = ?').bind('adm_s_' + await sha256hex(key)).first();
+    ok = !!(row && parseInt(row.value, 10) > Date.now());
+  } else if (!twoFaOn(env)) ok = await passwordOk(env, key);
+  if (!ok) { await addFail(env, '__admin__'); throw new HttpError(401, 'Acces refuse.'); }
+}
+async function adminLogin(request, env) {
+  const b = await readBody(request);
+  if (await tooManyFails(env, '__admin__', 10)) throw new HttpError(429, 'Trop d’essais. Reessaie dans 15 minutes.');
+  if (!(await passwordOk(env, b.password))) { await addFail(env, '__admin__'); throw new HttpError(401, 'Mot de passe incorrect.'); }
+  if (!twoFaOn(env)) return json({ ok: true, step: 'ok', token: await newAdminSession(env) });
+  const code = String(crypto.getRandomValues(new Uint16Array(1))[0] % 1000).padStart(3, '0');
+  await env.DB.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').bind('admin_2fa', JSON.stringify({ h: await sha256hex('c' + code), exp: Date.now() + 5 * 60 * 1000, tries: 0 })).run();
+  const r = await sendMail(env, env.ADMIN_EMAIL, 'Code de connexion · Hybride Coaching', 'Ton code de connexion : ' + code + '\nIl est valable 5 minutes et ne fonctionne qu’une fois.');
+  if (!r.sent) throw new HttpError(502, 'Envoi du code impossible' + (r.error ? ' (' + r.error + ')' : '') + '.');
+  return json({ ok: true, step: 'code' });
+}
+async function adminVerify(request, env) {
+  const b = await readBody(request);
+  if (await tooManyFails(env, '__admin__', 10)) throw new HttpError(429, 'Trop d’essais. Reessaie dans 15 minutes.');
+  if (!(await passwordOk(env, b.password))) { await addFail(env, '__admin__'); throw new HttpError(401, 'Mot de passe incorrect.'); }
+  const row = await env.DB.prepare("SELECT value FROM settings WHERE key = 'admin_2fa'").first();
+  let st = null; try { st = row ? JSON.parse(row.value) : null; } catch (e) { st = null; }
+  if (!st || st.exp < Date.now() || st.tries >= 3) { await env.DB.prepare("DELETE FROM settings WHERE key = 'admin_2fa'").run(); throw new HttpError(401, 'Code expiré. Recommence la connexion.'); }
+  const good = safeEqual(st.h, await sha256hex('c' + String(b.code || '').trim()));
+  if (!good) {
+    st.tries++;
+    await env.DB.prepare('UPDATE settings SET value = ? WHERE key = ?').bind(JSON.stringify(st), 'admin_2fa').run();
+    await addFail(env, '__admin__');
+    throw new HttpError(401, 'Code incorrect.');
+  }
+  await env.DB.prepare("DELETE FROM settings WHERE key = 'admin_2fa'").run();
+  return json({ ok: true, token: await newAdminSession(env) });
 }
 
 /* ---------- routes ---------- */
@@ -498,6 +545,8 @@ export async function onRequest(context) {
       if (path === '/logout') return await logout(request, env);
       if (path === '/orders') return await createOrder(request, env);
       if (path === '/account/delete') return await deleteAccount(request, env);
+      if (path === '/admin/login') return await adminLogin(request, env);
+      if (path === '/admin/verify') return await adminVerify(request, env);
       if (path === '/admin/orders') return await adminOrders(request, env);
       if (path === '/admin/mark') return await adminMark(request, env);
       if (path === '/review') return await postReview(request, env);

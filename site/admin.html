@@ -15,8 +15,8 @@
 </style></head><body>
 <main class="wrap legal-page" style="max-width:1200px">
 <div class="eyebrow">PRIVÉ</div><h1 style="font-size:40px">ADMINISTRATION</h1>
-<div id="login"><p class="muted">Entre ta clé d'administration (elle n'est jamais enregistrée dans le navigateur).</p>
-<input id="key" type="password" placeholder="Clé d'administration" style="max-width:420px"><div class="buttons"><button class="btn" id="go" type="button">ENTRER</button></div><p class="mini" id="err"></p></div>
+<div id="login"><p class="muted">Entre ton mot de passe d'administration (il n'est jamais enregistré dans le navigateur).</p>
+<input id="key" type="password" placeholder="Mot de passe" autocomplete="current-password" style="max-width:420px"><div id="codeBox" hidden><p class="muted">Un code à 3 chiffres vient d'être envoyé à ton adresse e-mail.</p><input id="code" inputmode="numeric" maxlength="3" placeholder="Code à 3 chiffres" autocomplete="one-time-code" style="max-width:220px"></div><div class="buttons"><button class="btn" id="go" type="button">ENTRER</button></div><p class="mini" id="err"></p></div>
 <div id="panel" hidden>
 <div class="stats" id="top"></div>
 <div class="admtabs"><button type="button" data-tab="orders" class="on">Commandes</button><button type="button" data-tab="relances">Relances d'avis <span id="relN"></span></button><button type="button" data-tab="revenus">Revenus</button><button type="button" data-tab="stats">Par programme</button><button type="button" data-tab="reviews">Avis <span id="pendN"></span></button><button type="button" data-tab="codes">Codes d'avis</button></div>

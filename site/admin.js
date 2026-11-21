@@ -87,8 +87,17 @@
     var t=L.map(function(r){return r.map(function(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'}).join(';')}).join('\n');
     var a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+t],{type:'text/csv'}));a.download='commandes.csv';document.body.appendChild(a);a.click();a.remove();
   }
-  $('go').onclick=function(){KEY=$('key').value.trim();$('key').value='';$('err').textContent='';loadOrders().then(function(){return loadReviews()}).catch(function(){})};
+  var PW='';
+  function post(p,b){return fetch(p,{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify(b)}).then(function(r){return r.json().then(function(d){if(!r.ok)throw new Error(d.error||'Erreur');return d},function(){throw new Error('Réponse illisible')})})}
+  function enter(tok){KEY=tok;PW='';$('key').value='';$('code').value='';$('err').textContent='';loadOrders().then(function(){return loadReviews()}).catch(function(){})}
+  $('go').onclick=function(){
+    $('err').textContent='';
+    if(!$('codeBox').hidden){post('/api/admin/verify',{password:PW,code:$('code').value}).then(function(d){enter(d.token)}).catch(function(e){$('err').textContent=e.message});return}
+    PW=$('key').value;
+    post('/api/admin/login',{password:PW}).then(function(d){if(d.step==='ok')enter(d.token);else{$('codeBox').hidden=false;$('key').hidden=true;$('code').focus()}}).catch(function(e){$('err').textContent=e.message});
+  };
   $('key').onkeydown=function(e){if(e.key==='Enter')$('go').click()};
+  $('code').onkeydown=function(e){if(e.key==='Enter')$('go').click()};
   $('refresh').onclick=function(){loadOrders()};
   $('csv').onclick=csv;
   document.querySelector('.admtabs').onclick=function(e){var b=e.target.closest('button');if(b)tab(b.dataset.tab)};
